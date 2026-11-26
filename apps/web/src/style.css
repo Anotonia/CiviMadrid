@@ -96,3 +96,16 @@ h1,h2,h3,p{margin:0}
 .replay-panel label{font-size:11px;letter-spacing:.04em;color:#e4c48c}
 .replay-panel textarea{font:11px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;width:100%;resize:vertical;min-height:84px;border:1px solid #506e79;background:#0d1e2b;color:#e6eeef;padding:8px}
 .replay-panel textarea:focus{outline:2px solid #e4c48c;outline-offset:1px}
+
+/* Accessible sequential territory navigation, shared by mouse and keyboard gameplay. */
+.site-navigator{padding:12px 14px;background:#1a303e;border:1px solid #425f70;display:grid;gap:8px}
+.site-navigator-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;letter-spacing:.08em;color:#e8c783}
+.site-navigator-heading span{color:#b4c6cf;letter-spacing:0}
+.site-navigator-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.site-navigator button{padding:9px 7px;background:#294351;border:1px solid #66818e;color:#eef3ed;font-size:12px}
+.site-navigator button:hover:not(:disabled){background:#355d64}
+.site-navigator button:disabled{opacity:.5;cursor:not-allowed}
+.site-navigator label{font-size:10px;color:#d4dfe2}
+.site-navigator select{background:#102634;border:1px solid #66818e;color:#f4efe2;padding:10px;width:100%;font-size:12px}
+.site-navigator select:focus-visible,.site-navigator button:focus-visible{outline:2px solid #e8c783;outline-offset:2px}
+.site-navigator small{font-size:10px;line-height:1.5;color:#9daeb7}
