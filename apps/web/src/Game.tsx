@@ -42,7 +42,7 @@ export default function Game(){
  function build(choice:Choice){
   if(!current)return;
   if(current.terrain==='water'){setMessage('Water tiles are not buildable in this prototype.');return;}
-  dispatch({kind:choice.command,cellId:current.id});
+  dispatch({kind:choice.command,cellId:current.id} as Command);
  }
  return <div className="shell">
   <header className="topbar"><div className="brand"><div className="brand-mark">C<span>·</span>M</div><div><h1>CiviMadrid</h1><p>THE CITY IS YOUR STRATEGY</p></div></div>
