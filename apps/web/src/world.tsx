@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { Canvas, ThreeEvent } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import type { WorldState } from '../../../packages/world-schema/src/index';
 
 export type Terrain = 'urban' | 'forest' | 'water' | 'park' | 'other';
 export interface PrototypeCell {
@@ -106,12 +107,39 @@ function Selection({cell}: {cell?: PrototypeCell}) {
   );
 }
 
+function BuiltAssets({cells, world}: {cells:PrototypeCell[];world?:WorldState}) {
+  if(!world)return null;
+  return <group>
+    {cells.filter(c=>world.cells[c.id]?.improvement!=='none' && world.cells[c.id]?.improvement).map(cell=>{
+      const state=world.cells[cell.id];
+      const construction=state.constructionTurnsRemaining>0;
+      const color=construction?'#d8ae6d':
+        state.improvement==='solar'?'#215475':state.improvement==='housing'?'#d9b69a':'#5bb1b4';
+      return <group key={cell.id} position={[cell.x,cell.y+0.38,cell.z]}>
+       <mesh castShadow position={[0,0.12,0]}>
+        {state.improvement==='housing'
+          ? <boxGeometry args={[0.62,construction?0.25:0.80,0.54]}/>
+          : state.improvement==='solar'
+            ? <boxGeometry args={[0.72,0.13,0.50]}/>
+            : <cylinderGeometry args={[0.34,0.42,construction?0.17:0.48,8]}/>}
+        <meshStandardMaterial color={color} metalness={0.20} roughness={0.66}/>
+       </mesh>
+       {construction && <mesh rotation={[-Math.PI/2,0,0]} position={[0,0.01,0]}>
+        <ringGeometry args={[0.65,0.73,6]}/>
+        <meshBasicMaterial color="#f0c77c" side={THREE.DoubleSide}/>
+       </mesh>}
+      </group>;
+    })}
+  </group>;
+}
+
 export function WorldScene({
-  selectedId, onSelect, onHover
+  selectedId, onSelect, onHover, world
 }: {
   selectedId: string | null;
   onSelect:(id:string)=>void;
   onHover:(id:string|null)=>void;
+  world?: WorldState;
 }) {
   const cells = useMemo(syntheticCells, []);
   const selected = cells.find(c=>c.id === selectedId);
@@ -130,6 +158,7 @@ export function WorldScene({
       <directionalLight position={[16,32,14]} intensity={3.0} castShadow shadow-mapSize={[1024,1024]}/>
       <group rotation={[0,Math.PI/6,0]}>
         {TERRAINS.map(terrain => <HexLayer key={terrain} terrain={terrain} cells={cells} onSelect={onSelect} onHover={onHover}/>)}
+        <BuiltAssets cells={cells} world={world}/>
         <Selection cell={selected}/>
       </group>
       <OrbitControls
