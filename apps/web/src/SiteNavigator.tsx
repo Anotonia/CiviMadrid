@@ -18,7 +18,7 @@ export function SiteNavigator({cells,selectedId,onSelect,isAvailable=()=>true}:P
   const position=index>=0?index:-1;
   const jump=(direction:1|-1)=>{
     if(!eligible.length)return;
-    const next=(position+direction+eligible.length)%eligible.length;
+    const next=position < 0 ? (direction===1 ? 0 : eligible.length-1) : (position+direction+eligible.length)%eligible.length;
     onSelect(eligible[next].id);
   };
   return <div className="site-navigator" role="group" aria-label="Buildable territory navigation">
