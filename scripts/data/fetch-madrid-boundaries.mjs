@@ -10,11 +10,11 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 export const RESOURCE = {
-  sourceId: 'madrid-district-boundaries-900012-5',
+  sourceId: 'madrid-district-boundaries-900012-3',
   publisher: 'Ayuntamiento de Madrid',
   datasetTitle: 'Límites administrativos actuales — Distritos municipales',
-  resourcePage: 'https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-5-limites-administrativos-mapas',
-  downloadUrl: 'https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-5-limites-administrativos-mapas/download/900012-5-limites-administrativos-mapas.json',
+  resourcePage: 'https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-3-limites-administrativos-mapas',
+  downloadUrl: 'https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-3-limites-administrativos-mapas/download/900012-3-limites-administrativos-mapas.json',
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
   attributionText: 'Datos del Ayuntamiento de Madrid, licencia CC BY 4.0',
 };
