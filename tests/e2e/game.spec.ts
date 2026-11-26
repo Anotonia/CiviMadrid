@@ -70,3 +70,21 @@ test('exported replay restores authoritative world and refuses tampered checksum
   await expect(page.locator('.event-panel')).toContainText('Replay rejected: Replay checksum mismatch');
   await expect(page.locator('.game-hud-title')).toContainText('QUARTER 1 OF 12');
 });
+
+test('strategy works across three distinct sites and wins at turn 12',async({page})=>{
+  await page.goto('/');
+  const next=page.getByRole('button',{name:'Next buildable site'});
+  await next.click();
+  await page.getByRole('button',{name:'Build Water recovery'}).click();
+  await next.click();
+  await page.getByRole('button',{name:'Build Solar field'}).click();
+  await next.click();
+  await page.getByRole('button',{name:'Build New housing'}).click();
+  await expect(page.locator('.game-stat').first()).toContainText('700');
+  for(let turn=0;turn<12;turn++){
+    await page.getByRole('button',{name:/ADVANCE QUARTER/}).click();
+  }
+  await expect(page.locator('.campaign-result')).toContainText('CAMPAIGN STATUS: WON');
+  await expect(page.locator('.campaign-result')).toContainText('Serviced homes 60/40');
+  await expect(page.getByRole('button',{name:'CAMPAIGN ENDED'})).toBeDisabled();
+});
