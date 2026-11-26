@@ -7,7 +7,10 @@ import { acquire, RESOURCE } from './fetch-madrid-boundaries.mjs';
 import { validateManifest } from './validate-manifest.mjs';
 const mock = bytes => async () => ({ok:true,arrayBuffer:async()=>bytes});
 test('source fixture is downloaded and checksummed with attribution',async()=>{
-  const data = Buffer.from(JSON.stringify({type:'FeatureCollection',features:[]}));
+  const data = Buffer.from(JSON.stringify({type:'FeatureCollection',features:[{
+    type:'Feature',id:'synthetic-fixture',properties:{},
+    geometry:{type:'Polygon',coordinates:[[[-3.70,40.42],[-3.69,40.42],[-3.69,40.43],[-3.70,40.42]]]}
+  }]}));
   const dir=await mkdtemp(path.join(tmpdir(),'civimadrid-'));
   try {
     const outcome=await acquire(dir,mock(data));
