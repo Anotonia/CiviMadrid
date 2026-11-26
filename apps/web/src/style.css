@@ -83,3 +83,16 @@ h1,h2,h3,p{margin:0}
 /* Integrated prototype: keep provenance message legible above the game controls */
 .world .map-warning{bottom:140px;right:16px;max-width:320px;line-height:1.45;text-align:right;z-index:4}
 @media(max-width:760px){.world .map-warning{bottom:158px;left:auto;right:8px;max-width:250px;font-size:8px}}
+
+/* M0+ campaign outcome and deterministic replay controls. */
+.campaign-result {padding:13px 15px;border:1px solid #6f8b86;background:#1a3b3c;color:#e5ece3}
+.campaign-result strong{display:block;color:#a6e2c6;letter-spacing:.1em;font-size:10px}
+.campaign-result p{font-size:12px;line-height:1.55;margin-top:8px}
+.campaign-result small{display:block;margin-top:9px;color:#b9c9c4;font-size:11px}
+.replay-controls {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.replay-controls button,.replay-panel button{padding:10px 12px;border:1px solid #d5b474;background:#243b49;color:#f5d399;font-size:12px;font-weight:600}
+.replay-controls button:hover,.replay-panel button:hover{background:#365064}
+.replay-panel{display:flex;flex-direction:column;gap:8px;padding:12px;background:#1c3140;border:1px solid #355165}
+.replay-panel label{font-size:11px;letter-spacing:.04em;color:#e4c48c}
+.replay-panel textarea{font:11px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;width:100%;resize:vertical;min-height:84px;border:1px solid #506e79;background:#0d1e2b;color:#e6eeef;padding:8px}
+.replay-panel textarea:focus{outline:2px solid #e4c48c;outline-offset:1px}
