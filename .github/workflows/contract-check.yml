@@ -1,0 +1,26 @@
+name: Contract integrity
+on:
+  pull_request:
+    branches:
+      - main
+      - plan/m0-m2-playable-madrid
+  push:
+    branches:
+      - plan/m0-m2-playable-madrid
+jobs:
+  source-of-truth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify master plan, schema, and agent contract exist
+        run: |
+          set -eu
+          test -s AGENTS.md
+          test -s docs/MASTER_PLAN.md
+          test -s docs/WORLD_CONTRACT.md
+          test -s docs/AGENT_PLAYBOOK.md
+          test -s packages/world-schema/src/index.ts
+      - name: Report gate coverage honestly
+        run: |
+          echo "This checks CONTRACT FILE PRESENCE ONLY."
+          echo "M0/M1/M2 runtime, visual, legal and replay gates are NOT VERIFIED by this job."
