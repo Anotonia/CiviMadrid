@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { WorldScene, syntheticCells } from './world';
 import type { Command, ConstructionKind, WorldState } from '../../../packages/world-schema/src/index';
-import { reduceWorld } from '../../../packages/sim-core/src/index';
+import { reduceWorld, evaluateCampaign, replay, recordReplay, canonicalStateHash } from '../../../packages/sim-core/src/index';
 import { SYNTHETIC_PARAMS } from '../../../packages/sim-core/src/fixtures';
 
 type Choice = {kind:ConstructionKind;label:string;command: 'BUILD_WATER_REUSE'|'BUILD_SOLAR'|'BUILD_HOUSING';hint:string};
@@ -25,6 +25,9 @@ export default function Game(){
  const cells=useMemo(syntheticCells,[]);
  const [state,setState]=useState<WorldState>(()=>stateFor(cells.map(c=>c.id)));
  const [selection,setSelection]=useState<string|null>(null);
+ const [commands,setCommands]=useState<Command[]>([]);
+ const [replayJson,setReplayJson]=useState('');
+ const [replayVisible,setReplayVisible]=useState(false);
  const [message,setMessage]=useState('Choose a development site and build. Each change is an actual engine command.');
  const current=cells.find(c=>c.id===selection);
  const occupation=selection?state.cells[selection]:undefined;
@@ -32,12 +35,54 @@ export default function Game(){
  const power=state.powerSupplyMWhPerDay-state.powerDemandMWhPerDay;
  const homes=Object.values(state.cells).reduce((n,c)=>n+c.servicedDwellings,0);
  const buildings=Object.values(state.cells).filter(c=>c.improvement!=='none').length;
+ const campaign=evaluateCampaign(state,SYNTHETIC_PARAMS);
+ const over=campaign.phase!=='playing';
+ const originalWorld=()=>stateFor(cells.map(c=>c.id));
+ function restart(){
+  setState(originalWorld());setCommands([]);setSelection(null);
+  setReplayJson('');setReplayVisible(false);
+  setMessage('World restarted from initial synthetic state.');
+ }
+ function exportReplay(){
+  const initial=originalWorld();
+  const encoded={...recordReplay(initial,commands),finalStateHash:canonicalStateHash(state)};
+  setReplayJson(JSON.stringify(encoded,null,2));
+  setReplayVisible(true);
+  setMessage('Replay JSON prepared; copy or edit it, then use Load replay to verify.');
+ }
+ function importReplay(){
+  try{
+   const obj:unknown=JSON.parse(replayJson);
+   if(!obj||typeof obj!=='object') throw new Error('Invalid replay object');
+   const p=obj as Record<string,unknown>;
+   const first=originalWorld();
+   if(p.schemaVersion!==first.schemaVersion||p.scenarioId!==first.scenarioId||
+      p.sourceSnapshotHash!==first.sourceSnapshotHash||p.engineVersion!==first.engineVersion||
+      p.seed!==first.seed) throw new Error('Replay scenario or source snapshot does not match');
+   if(!Array.isArray(p.commands)||p.commands.length>250) throw new Error('Invalid or overlong command list');
+   for(const action of p.commands){
+    if(!action||typeof action!=='object')throw new Error('Invalid replay action');
+    if(!['BUILD_WATER_REUSE','BUILD_SOLAR','BUILD_HOUSING','ADVANCE_TURN'].includes(action.kind))
+      throw new Error('Unknown command');
+    if(action.kind!=='ADVANCE_TURN'&&typeof action.cellId!=='string')
+      throw new Error('Invalid action cell');
+   }
+   const next=replay(first,p.commands as Command[],SYNTHETIC_PARAMS);
+   if(p.finalStateHash!==canonicalStateHash(next))throw new Error('Replay checksum mismatch');
+   setState(next);setCommands(p.commands as Command[]);
+   setMessage('Replay restored and verified against the authoritative engine.');
+  }catch(e){setMessage(`Replay rejected: ${e instanceof Error?e.message:'Unknown error'}`);}
+ }
+
 
  function dispatch(action:Command){
   const result=reduceWorld(state,action,SYNTHETIC_PARAMS);
   if(!result.accepted){setMessage(`Action rejected: ${result.message}`);return;}
   setState(result.state);
-  setMessage(result.events.at(-1)?.explanation ?? 'Action accepted.');
+  setCommands(previous=>[...previous,action]);
+  const outcome=evaluateCampaign(result.state,SYNTHETIC_PARAMS);
+  setMessage(outcome.phase!=='playing' ? outcome.explanation :
+    result.events.at(-1)?.explanation ?? 'Action accepted.');
  }
  function build(choice:Choice){
   if(!current)return;
@@ -47,7 +92,7 @@ export default function Game(){
  return <div className="shell">
   <header className="topbar"><div className="brand"><div className="brand-mark">C<span>·</span>M</div><div><h1>CiviMadrid</h1><p>THE CITY IS YOUR STRATEGY</p></div></div>
    <div className="headline-status"><span className="status-beacon"/><span>ENGINE INTEGRATION</span><strong>SYNTHETIC M0</strong></div>
-   <button className="plain-button" onClick={()=>{setState(stateFor(cells.map(c=>c.id)));setSelection(null);setMessage('World restarted from initial synthetic state.');}}>Restart scenario</button>
+   <button className="plain-button" onClick={restart}>Restart scenario</button>
   </header>
   <main className="game">
    <section className="world" aria-label="Interactive synthetic world">
@@ -56,15 +101,15 @@ export default function Game(){
     <div className="map-warning" role="status">SYNTHETIC TERRAIN & GAME ECONOMY · NOT AN OFFICIAL MADRID FORECAST</div>
     <div className="compass" aria-hidden="true">N<br/><span>↑</span></div>
     <div className="game-hud">
-     <div className="game-hud-title">CAMPAIGN — QUARTER {state.turn} OF 12</div>
+     <div className="game-hud-title">CAMPAIGN — QUARTER {state.turn} OF 12 · {campaign.phase.toUpperCase()}</div>
      <div className="game-stats">
       <Stat name="TREASURY" value={state.treasuryKeur} unit="k€"/>
       <Stat name="WATER" value={water} unit="m³/day" warning={water<0}/>
       <Stat name="POWER" value={power} unit="MWh/day" warning={power<0}/>
       <Stat name="SERVED HOMES" value={homes}/>
      </div>
-     <button className="advance-turn" onClick={()=>dispatch({kind:'ADVANCE_TURN'})} disabled={state.turn>=12}>
-      {state.turn>=12?'12-QUARTER LIMIT REACHED':'ADVANCE QUARTER →'}
+     <button className="advance-turn" onClick={()=>dispatch({kind:'ADVANCE_TURN'})} disabled={over}>
+      {over?'CAMPAIGN ENDED':'ADVANCE QUARTER →'}
      </button>
     </div>
    </section>
@@ -88,13 +133,27 @@ export default function Game(){
     <div className="build-actions">
      {CHOICES.map(choice=><button key={choice.kind}
        aria-label={`Build ${choice.label}`}
-       disabled={!current || current.terrain==='water' || occupation?.improvement!=='none' || state.turn>=12 || state.treasuryKeur<SYNTHETIC_PARAMS.actionCostKeur[choice.kind]}
+       disabled={!current || current.terrain==='water' || occupation?.improvement!=='none' || over || state.treasuryKeur<SYNTHETIC_PARAMS.actionCostKeur[choice.kind]}
        onClick={()=>build(choice)}>
        <span><b>{choice.label}</b><small>{choice.hint}</small></span><em>{SYNTHETIC_PARAMS.actionCostKeur[choice.kind]}k€</em>
       </button>)}
     </div>
+    <div className="campaign-result" role="status">
+     <strong>CAMPAIGN STATUS: {campaign.phase.toUpperCase()}</strong>
+     <p>{campaign.explanation}</p>
+     <small>Serviced homes {campaign.servicedHomes}/{campaign.targetHomes} · Critical shortage streak {campaign.shortageStreak}/3</small>
+    </div>
     <div className="event-panel" role="status"><span>ENGINE EVENTS · {state.eventLog.length} LOGGED</span><p>{message}</p></div>
-    <p className="small-note">Development sites: {buildings}. M0 integration only: no victory model, saved game or official geographic observations yet.</p>
+    <div className="replay-controls">
+     <button onClick={exportReplay}>Export replay</button>
+     <button onClick={()=>setReplayVisible(v=>!v)}>{replayVisible?'Hide replay':'Show replay input'}</button>
+    </div>
+    {replayVisible && <div className="replay-panel">
+      <label htmlFor="civimadrid-replay">Replay JSON · synthetic test data only</label>
+      <textarea id="civimadrid-replay" aria-label="Replay JSON" value={replayJson} onChange={event=>setReplayJson(event.target.value)} rows={5}/>
+      <button onClick={importReplay}>Load replay</button>
+    </div>}
+    <p className="small-note">Development sites: {buildings}. M0 synthetic scenario only. This now has victory rules and replay import/export; no official Madrid observations or calibrated forecast.</p>
     <footer className="inspector-footer">CIVIMADRID / SYNTHETIC ENGINE DEMO <span>v0.1 · M0</span></footer>
    </aside>
   </main>
