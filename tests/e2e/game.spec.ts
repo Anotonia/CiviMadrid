@@ -33,3 +33,40 @@ test('rejects duplicate construction and preserves treasury',async({page})=>{
   await expect(page.getByRole('button',{name:'Build Solar field'})).toBeDisabled();
   await expect(page.locator('.game-stat').first()).toContainText('900');
 });
+
+test('12 quarter loss is visible and prevents any further actions',async({page})=>{
+  await page.goto('/');
+  for(let turn=0;turn<12;turn++){
+    await page.getByRole('button',{name:/ADVANCE QUARTER/}).click();
+  }
+  await expect(page.locator('.game-hud-title')).toContainText('QUARTER 12 OF 12');
+  await expect(page.locator('.campaign-result')).toContainText('CAMPAIGN STATUS: LOST');
+  await expect(page.locator('.campaign-result')).toContainText('housing goal');
+  await expect(page.getByRole('button',{name:'CAMPAIGN ENDED'})).toBeDisabled();
+  await page.getByRole('button',{name:'Select buildable site'}).click();
+  await expect(page.getByRole('button',{name:'Build Solar field'})).toBeDisabled();
+});
+
+test('exported replay restores authoritative world and refuses tampered checksum',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Select buildable site'}).click();
+  await page.getByRole('button',{name:'Build Solar field'}).click();
+  await page.getByRole('button',{name:/ADVANCE QUARTER/}).click();
+  await page.getByRole('button',{name:'Export replay'}).click();
+  const textarea=page.getByRole('textbox',{name:'Replay JSON'});
+  const data=JSON.parse(await textarea.inputValue());
+  expect(data.commands).toHaveLength(2);
+  expect(data.finalStateHash).toMatch(/^[a-f0-9]{8}$/);
+  await page.getByRole('button',{name:'Restart scenario'}).click();
+  await expect(page.locator('.game-hud-title')).toContainText('QUARTER 0 OF 12');
+  await page.getByRole('button',{name:'Show replay input'}).click();
+  await textarea.fill(JSON.stringify(data));
+  await page.getByRole('button',{name:'Load replay'}).click();
+  await expect(page.locator('.game-hud-title')).toContainText('QUARTER 1 OF 12');
+  await expect(page.locator('.event-panel')).toContainText('Replay restored and verified');
+  await expect(page.locator('.game-stat').first()).toContainText('920');
+  await textarea.fill(JSON.stringify({...data,finalStateHash:'00000000'}));
+  await page.getByRole('button',{name:'Load replay'}).click();
+  await expect(page.locator('.event-panel')).toContainText('Replay rejected: Replay checksum mismatch');
+  await expect(page.locator('.game-hud-title')).toContainText('QUARTER 1 OF 12');
+});
