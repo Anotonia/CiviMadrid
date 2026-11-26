@@ -25,3 +25,9 @@ test('rejects invalid/non-geographic responses',async()=>{
     await assert.rejects(acquire(dir,mock(Buffer.from('{"type":"NotGeometry"}'))),/Unexpected geometry/);
   } finally {await rm(dir,{recursive:true,force:true});}
 });
+
+test('regression: official district layer is resource 900012-3, not census sections 900012-5',()=>{
+  assert.match(RESOURCE.downloadUrl,/900012-3-limites-administrativos-mapas/);
+  assert.match(RESOURCE.resourcePage,/900012-3-limites-administrativos-mapas/);
+  assert.doesNotMatch(RESOURCE.downloadUrl,/900012-5/);
+});
