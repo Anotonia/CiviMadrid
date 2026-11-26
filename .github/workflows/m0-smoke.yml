@@ -1,0 +1,61 @@
+name: M0 source, simulation and browser build checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify-components:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate shared contracts
+        run: |
+          set -eu
+          test -s AGENTS.md
+          test -s docs/WORLD_CONTRACT.md
+          test -s packages/world-schema/src/index.ts
+      - name: GeoData tests (when present)
+        run: |
+          set -eu
+          if test -f scripts/data/validate-manifest.test.mjs; then
+            node --test scripts/data/*.test.mjs
+          else
+            echo "SKIP: GeoData tests not on this branch"
+          fi
+      - name: Simulation typecheck and unit tests (when present)
+        run: |
+          set -eu
+          if test -f packages/sim-core/package.json; then
+            cd packages/sim-core
+            npm install --no-audit --no-fund
+            npm run typecheck
+            npm test
+            npm run demo
+          else
+            echo "SKIP: SimCore not on this branch"
+          fi
+      - name: Browser TypeScript and production build (when present)
+        run: |
+          set -eu
+          if test -f apps/web/package.json; then
+            cd apps/web
+            npm install --no-audit --no-fund
+            npm run build
+          else
+            echo "SKIP: WorldUX web app not on this branch"
+          fi
+      - name: Publish gate scope
+        run: |
+          echo "This CI provides contract, source-validator, headless reducer, and web BUILD checks only WHEN PRESENT."
+          echo "It DOES NOT by itself establish actual browser playability, GIS accuracy, simulation balance, or M2 acceptance."
