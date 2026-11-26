@@ -1,8 +1,8 @@
 # Verified candidates and acquisition boundary — M0
 
-**Source identified; actual bytes NOT DOWNLOADED in this PR.** Independent web inspection (2026-11-26) identified the Madrid City Council's official district boundary resource:
+**Official resource catalog verified 2026-11-26; raw bytes NOT DOWNLOADED in this PR.** The previous 900012-5 locator was incorrectly described as district boundaries; it is **secciones censales**. The official **distritos municipales** JSON is 900012-3, corrected here. Independent web inspection (2026-11-26) identified the Madrid City Council's official district boundary resource:
 
-- [Límites administrativos actuales — Distritos municipales, JSON resource](https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-5-limites-administrativos-mapas)
+- [Límites administrativos actuales — Distritos municipales, JSON resource](https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-3-limites-administrativos-mapas)
 - Download link is pinned in `scripts/data/fetch-madrid-boundaries.mjs`.
 - Its dataset resource page marks **CC BY 4.0**. Attribution requirement: **Datos del Ayuntamiento de Madrid**.
 - Native geographical grain: administrative district polygons, **not an observed measurement at hex-cell resolution**.
