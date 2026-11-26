@@ -32,7 +32,15 @@ The first playable vertical slice targets a **small Madrid metropolitan area**, 
 - **M3 / Agent competitors:** bounded AI city/company behavior, tested against reference policies.
 - **M4 / Historical/scenario comparison:** historical observation versus hypothetical simulation clearly separated.
 
-Full planning material and implementation tasks will be tracked in the repository via documents, Issues and PRs.
+## Planning and tracking
+
+- [Product spec and acceptance criteria](docs/PRODUCT.md)
+- [Technical architecture and rules boundary](docs/ARCHITECTURE.md)
+- [Madrid data sources and licensing register](docs/DATA_AND_LICENSES.md)
+- [Build roadmap and verification gates](docs/ROADMAP.md)
+- [M0/M1/M2 delivery backlog](https://github.com/Anotonia/CiviMadrid/issues)
+
+**Current status:** planning only, source-license audit and prototype still pending.
 
 ## Reference and rights
 
