@@ -81,7 +81,7 @@ export default function Game(){
      </> : <>
       <span className="eyebrow">TERRITORY INSPECTOR</span><h3>Choose a hex</h3>
       <p>Click a tile on the 3D terrain or choose an eligible synthetic site.</p>
-      <button className="choose-site" onClick={()=>setSelection(cells.find(c=>c.terrain==='urban')?.id??null)}>Select buildable site</button>
+      <button className="choose-site" onClick={()=>setSelection(cells.find(c=>c.id==='syn-8-7' && c.terrain==='urban')?.id??null)}>Select buildable site</button>
      </>}
     </div>
     <div className="chapter"><span className="chapter-index">CHAPTER 02</span><strong>Development actions</strong></div>
