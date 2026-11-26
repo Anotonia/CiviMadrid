@@ -1,3 +1,6 @@
+import { evaluateCampaign } from './campaign';
+export { evaluateCampaign, M0_GOAL_SERVED_HOMES, MAX_SHORTAGE_TURNS } from './campaign';
+
 import type {
   CellId, Command, CommandResult, ConstructionKind, ImprovementKind,
   ReplayRecord, ScenarioParams, SimEvent, WorldState
@@ -48,6 +51,10 @@ function updateService(state: WorldState, params: ScenarioParams): void {
 export function reduceWorld(state: WorldState, command: Command, params: ScenarioParams): CommandResult {
   if (state.schemaVersion !== '0.1') return reject(state, 'BAD_SCHEMA', 'Unsupported world schema');
   if (state.scenarioId !== params.id) return reject(state, 'BAD_SCENARIO', 'Scenario mismatch');
+  if (state.turn >= params.maxTurns) return reject(state, 'GAME_COMPLETE', 'Game already complete');
+  if (evaluateCampaign(state, params).phase !== 'playing') {
+    return reject(state, 'CAMPAIGN_ENDED', 'The campaign has ended; restart or replay to continue');
+  }
   const improvement = asConstruction(command.kind);
   if (improvement && command.kind !== 'ADVANCE_TURN') {
     const cellId: CellId = command.cellId;
@@ -71,7 +78,6 @@ export function reduceWorld(state: WorldState, command: Command, params: Scenari
     return { accepted: true, state: next, events: [event] };
   }
   if (command.kind !== 'ADVANCE_TURN') return reject(state, 'UNKNOWN_COMMAND', 'Unknown command');
-  if (state.turn >= params.maxTurns) return reject(state, 'GAME_COMPLETE', 'Game already complete');
   const next = structuredClone(state);
   next.turn += 1;
   const events: SimEvent[] = [];
