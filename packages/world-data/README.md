@@ -1,15 +1,17 @@
-# GeoData / Data & GIS — M0 lane
+# GeoData / GIS — M0 source engineering
 
-**Workstream A**: own `packages/world-data/**`, `scripts/data/**`, source manifests, source/license review. See `docs/AGENT_PLAYBOOK.md`.
+**Current:** Candidate official Madrid district boundary distribution identified, attributed, and scripted for single-dataset acquisition. **Raw source NOT yet downloaded and geometry NOT verified.** See [SOURCES.md](SOURCES.md).
 
-## Reality boundary
-Do not assert that a hex cell has an officially observed municipal statistic. The transformation from official native grain to cell is **derived** and must include method and caveat.
+## Commands
 
-## First deliverable
-1. Inspect USA Civ downloadable source and all relevant third-party asset licenses before reuse (#1).
-2. Select one **real official** Madrid geometrical source and one empirical layer at documented grain, with distribution-level license and attribution.
-3. Save manifest with SHA256 of downloaded bytes, native CRS, field list, retrieval date, transform version.
-4. Export a small snapshot in the shape of `WorldSnapshot` from `packages/world-schema/src/index.ts`.
-5. Add validator tests proving missing license, source date and method caveat are rejected.
+From repository root, Node.js 22+:
 
-**Initial state:** no real Madrid dataset was downloaded or licensed as part of this scaffolding. Avoid committing scraped data, third-party imagery or unexplained numbers. The other lanes may use clearly synthetic geometry while the real-data audit proceeds.
+```bash
+node --test scripts/data/*.test.mjs
+node scripts/data/fetch-madrid-boundaries.mjs
+node scripts/data/validate-manifest.mjs .data-staging/madrid-districts.manifest.json .data-staging/madrid-districts.raw.json
+```
+
+Data download is separate from tests and should never run without a verified source license and attribution. Tests use synthetic in-memory fixtures, not a local copy of city datasets. Generated `.data-staging` is gitignored. The resource page marks CC BY 4.0, while download schema, CRS, geometry and suitability remain to be inspected before M1 release.
+
+**Next integration:** output an immutable `WorldSnapshot` matching `packages/world-schema/src/index.ts`, with official geometry and provenance. Do not invent hex-level observed statistics. See issues #1 and #4.
