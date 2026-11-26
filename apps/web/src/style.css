@@ -79,3 +79,7 @@ h1,h2,h3,p{margin:0}
 .event-panel p{font-size:12px;line-height:1.55;margin-top:5px}
 .small-note{font-size:11px;line-height:1.6;color:#9eb2b8}
 @media(max-width:760px){.game-hud{bottom:42px;left:8px;right:8px;max-width:none;grid-template-columns:1fr;gap:8px;padding:8px}.game-stats{gap:4px}.game-stat{padding:4px}.game-stat b{font-size:14px}.game-stat span{font-size:8px}.advance-turn{padding:11px}.world-label.top-left{max-width:190px}.world-label.top-left p{display:none}}
+
+/* Integrated prototype: keep provenance message legible above the game controls */
+.world .map-warning{bottom:140px;right:16px;max-width:320px;line-height:1.45;text-align:right;z-index:4}
+@media(max-width:760px){.world .map-warning{bottom:158px;left:auto;right:8px;max-width:250px;font-size:8px}}
