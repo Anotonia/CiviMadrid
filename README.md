@@ -32,6 +32,15 @@ The first playable vertical slice targets a **small Madrid metropolitan area**, 
 - **M3 / Agent competitors:** bounded AI city/company behavior, tested against reference policies.
 - **M4 / Historical/scenario comparison:** historical observation versus hypothetical simulation clearly separated.
 
+## Overall design and autonomous workstreams
+
+- [Master product & engineering plan](docs/MASTER_PLAN.md)
+- [Cross-agent world contract](docs/WORLD_CONTRACT.md)
+- [Multi-agent execution and ownership playbook](docs/AGENT_PLAYBOOK.md)
+- [Visual/game design direction](docs/ART_DIRECTION.md)
+- [Canonical shared TypeScript schema](packages/world-schema/src/index.ts)
+- [Autonomous agent repo instructions](AGENTS.md)
+
 ## Planning and tracking
 
 - [Product spec and acceptance criteria](docs/PRODUCT.md)
