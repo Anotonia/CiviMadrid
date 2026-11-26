@@ -1,10 +1,10 @@
 # CiviMadrid — Overall product plan & pre-build decision gate v0.3
 
 **Date:** 2026-11-26  
-**Status:** PLANNING / NO IMPLEMENTATION AUTHORIZATION.  
+**Status:** PLANNING BASELINE ACCEPTED 2026-11-26 — M0 IMPLEMENTATION AUTHORIZED; M1/M2 RELEASE GATES REMAIN OPEN.  
 **Primary repo:** https://github.com/Anotonia/CiviMadrid  
 **Reference plans:** MASTER_PLAN.md, PRODUCT.md, ARCHITECTURE.md, WORLD_CONTRACT.md, AGENT_PLAYBOOK.md.  
-**Operating rule:** Do not activate parallel implementation, merge worker PRs, deploy, or report runnable features until this planning gate has been reviewed and accepted. Earlier branch spikes are exploratory drafts only.
+**Operating rule:** User authorized proceeding with parallel implementation after planning review. Activate the four isolated M0 workstreams; keep feature PRs draft until code/test evidence is reviewed. Do not equate branch or PR creation with executed tests, and do not deploy without acceptance.
 
 ## 1. Product decision
 
@@ -85,7 +85,7 @@ Player UI -> Action Validator -> Pure Simulation Reducer -> authoritative WorldS
 
 | Phase | Deliverable | Gate |
 |---|---|---|
-| P / **Planning now** | Product blueprint, playable scenario rules, shared type contract, lane ownership, data/licensing audit plan, acceptance baseline | Architectural contradictions resolved; first-session UX and scope approved. **No code authorization before this gate.** |
+| P / **Planning now** | Product blueprint, playable scenario rules, shared type contract, lane ownership, data/licensing audit plan, acceptance baseline | Architectural contradictions resolved; first-session UX and scope approved. **M0 authorization granted; M1/M2 acceptance still evidence-gated.** |
 | M0 / feasibility | tiny source-verified geometry/data fixture; instanced map spike; 10-cell headless reducer with replay | actual run evidence + legal provenance, measurable render response and 100 seed test fixtures |
 | M1 / world | navigable visually credible Madrid map with at least one sourced layer | inspected native-grain data and attribution, real browser interaction evidence |
 | M2 / playable alpha | 12-turn water/energy/housing campaign, build/advance, explicit consequences, win/loss, save/replay | real human test + browser E2E + invariant/replay tests + recorded build artifacts |
@@ -133,4 +133,9 @@ Player UI -> Action Validator -> Pure Simulation Reducer -> authoritative WorldS
 
 ## 11. Actual status / what not to misreport
 
-Existing draft PR #8 includes planning documents and an initial world-schema declaration. Some worker branches contain early experimental commits from kickoff, but these have **not** been approved, compiled, tested, integrated or accepted as a runnable product. **Implementation activity is paused at user's direction while overall planning is refined.** Future work must first reconcile those drafts against this gate and the accepted contract.
+Existing draft PR #8 includes planning documents and an initial world-schema declaration. Some worker branches contain early experimental commits from kickoff, but these have **not** been approved, compiled, tested, integrated or accepted as a runnable product. **M0 parallel implementation is now authorized by the user.** The previous experimental commits must be reconciled, compiled and verified; no claim of product readiness is implied.
+
+
+## 12. Authorization log
+
+- **2026-11-26:** User said to proceed to the next step and then start collaborative multi-agent development. M0 engineering lanes are therefore authorized. This is not authorization for unreviewed deployment, paid external actions, or falsely marking feature gates complete.
