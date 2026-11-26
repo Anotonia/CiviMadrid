@@ -55,6 +55,26 @@ jobs:
           else
             echo "SKIP: WorldUX web app not on this branch"
           fi
+      - name: Browser gameplay acceptance (when present)
+        run: |
+          set -eu
+          if test -f tests/e2e/package.json; then
+            cd tests/e2e
+            npm install --no-audit --no-fund
+            npx playwright install --with-deps chromium
+            npm test
+          else
+            echo "SKIP: Playwright acceptance not on this branch"
+          fi
+      - name: Save browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: civimadrid-m0-browser-artifacts
+          path: |
+            tests/e2e/test-results/
+            tests/e2e/playwright-report/
+          if-no-files-found: warn
       - name: Publish gate scope
         run: |
           echo "This CI provides contract, source-validator, headless reducer, and web BUILD checks only WHEN PRESENT."
