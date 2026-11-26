@@ -8,6 +8,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
+import { validateMadridGeoJSON } from './validate-madrid-geometry.mjs';
 
 export const RESOURCE = {
   sourceId: 'madrid-district-boundaries-900012-3',
@@ -33,6 +34,11 @@ export async function acquire(outDir, fetchFn = fetch) {
   if (!['Topology','FeatureCollection','Feature'].includes(payload.type)) {
     throw new Error(`Unexpected geometry shape: ${String(payload.type)}`);
   }
+  if(payload.type==='FeatureCollection'){
+    const issues=validateMadridGeoJSON(payload);
+    if(issues.length)throw new Error(`Invalid Madrid GeoJSON: ${issues.slice(0,5).join('; ')}`);
+  }
+  // TopoJSON is permitted only as raw, UNVERIFIED staging pending decoding and CRS review.
   const sha256 = createHash('sha256').update(raw).digest('hex');
   const now = new Date().toISOString();
   const manifest = {
