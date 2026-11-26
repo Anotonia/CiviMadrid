@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { WorldScene, syntheticCells } from './world';
+import { SiteNavigator } from './SiteNavigator';
 import type { Command, ConstructionKind, WorldState } from '../../../packages/world-schema/src/index';
 import { reduceWorld, evaluateCampaign, replay, recordReplay, canonicalStateHash } from '../../../packages/sim-core/src/index';
 import { SYNTHETIC_PARAMS } from '../../../packages/sim-core/src/fixtures';
@@ -129,6 +130,8 @@ export default function Game(){
       <button className="choose-site" onClick={()=>setSelection(cells.find(c=>c.id==='syn-8-7' && c.terrain==='urban')?.id??null)}>Select buildable site</button>
      </>}
     </div>
+    <SiteNavigator cells={cells} selectedId={selection} onSelect={setSelection}
+      isAvailable={cell=>state.cells[cell.id]?.improvement==='none'}/>
     <div className="chapter"><span className="chapter-index">CHAPTER 02</span><strong>Development actions</strong></div>
     <div className="build-actions">
      {CHOICES.map(choice=><button key={choice.kind}
