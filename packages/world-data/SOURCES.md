@@ -21,3 +21,14 @@ The acquisition script performs a **single distribution download**, checks JSON 
 ### Legal boundary
 
 Do not reuse USA Civ code/assets before inspecting **the actual archive** and its third-party notices. Do not bulk-fetch OSM tiles. Next: inspect district polygon CRS, valid rings, geometry bounds, timestamp and validate import into the canonical WorldSnapshot.
+
+
+## 2026-11-27 independent official-source inspection (metadata, NOT acquired bytes)
+
+The official Geoportal's [Límites administrativos actuales service](https://geoportal.madrid.es/IDEAM_WBGEOPORTAL/dataset.iam?id=e251898e-4a9c-11eb-9104-dc4a3e8ce33b) reports **EPSG:25830** as the service/dataset reference system. Its separately published **[district TopoJSON](https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/LIMITES_ADMINISTRATIVOS/Distritos/TopoJSON/Distritos.json)** is readable and contains a `Topology` with `objects.Distritos` and district `COD_DIS` / `NOMBRE` properties. The TopoJSON's quantization transform is **scale = [0.000010000269667, 0.000010000301928]** and **translate = [-3.888963415890898, 40.312064757565466]**, which indicates longitude/latitude-sized decoded coordinates, NOT raw UTM metre coordinates. These are different distributions/representations; do not blindly apply EPSG:25830 conversion to the TopoJSON.
+
+Portal metadata alone does **not** establish geometric correctness, full source-file hash, exact number of returned features, or eligibility of individual hexes for construction. Raw-source fetch, checksum, conversion, geometry checks, feature-count and topology review, and explicit source attribution remain **release blockers**. Once acquired, verify the decoded coordinates through `topologyToGeoJSON` and `requireMadridWGS84`. Until then, synthetic tile types remain synthetic.
+
+Related official source: [Barrios TopoJSON](https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/LIMITES_ADMINISTRATIVOS/Barrios/TopoJSON/Barrios.json) (portal describes 131 barrios). Official street vectors are a separate layer and not included in the administrative polygons.
+
+M1 UI acceptance: a user must be able to recognize the actual Madrid municipal outline, district topology, district names and source/attribution. A generated hex grid alone fails this gate.
