@@ -88,3 +88,18 @@ test('strategy works across three distinct sites and wins at turn 12',async({pag
   await expect(page.locator('.campaign-result')).toContainText('Serviced homes 60/40');
   await expect(page.getByRole('button',{name:'CAMPAIGN ENDED'})).toBeDisabled();
 });
+
+test('water terrain is excluded from selectable construction and replay cannot bypass the engine',async({page})=>{
+  await page.goto('/');
+  const selection=page.getByRole('combobox',{name:'Buildable territory'});
+  await expect(selection.locator('option[value="syn-7-7"]')).toHaveCount(0);
+  await page.getByRole('button',{name:'Export replay'}).click();
+  const textarea=page.getByRole('textbox',{name:'Replay JSON'});
+  const data=JSON.parse(await textarea.inputValue());
+  data.commands=[{kind:'BUILD_SOLAR',cellId:'syn-7-7'}]; // Procedural water tile.
+  await textarea.fill(JSON.stringify(data));
+  await page.getByRole('button',{name:'Load replay'}).click();
+  await expect(page.locator('.event-panel')).toContainText('Replay rejected: UNBUILDABLE_GEO_CELL');
+  await expect(page.locator('.game-stat').first()).toContainText('1,000');
+  await expect(page.locator('.game-hud-title')).toContainText('QUARTER 0 OF 12');
+});
