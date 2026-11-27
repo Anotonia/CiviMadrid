@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { WorldScene, syntheticCells } from './world';
 import { SiteNavigator } from './SiteNavigator';
+import { syntheticGeography } from './geoAdapter';
 import type { Command, ConstructionKind, WorldState } from '../../../packages/world-schema/src/index';
-import { reduceWorld, evaluateCampaign, replay, recordReplay, canonicalStateHash } from '../../../packages/sim-core/src/index';
+import { evaluateCampaign, recordReplay, canonicalStateHash } from '../../../packages/sim-core/src/index';
+import { reduceWorldWithGeography, replayWithGeography } from '../../../packages/sim-core/src/geography';
 import { SYNTHETIC_PARAMS } from '../../../packages/sim-core/src/fixtures';
 
 type Choice = {kind:ConstructionKind;label:string;command: 'BUILD_WATER_REUSE'|'BUILD_SOLAR'|'BUILD_HOUSING';hint:string};
@@ -24,6 +26,7 @@ function Stat({name,value,unit='',warning=false}:{name:string,value:number,unit?
 
 export default function Game(){
  const cells=useMemo(syntheticCells,[]);
+ const geography=useMemo(()=>syntheticGeography(cells),[cells]);
  const [state,setState]=useState<WorldState>(()=>stateFor(cells.map(c=>c.id)));
  const [selection,setSelection]=useState<string|null>(null);
  const [commands,setCommands]=useState<Command[]>([]);
@@ -68,7 +71,7 @@ export default function Game(){
     if(action.kind!=='ADVANCE_TURN'&&typeof action.cellId!=='string')
       throw new Error('Invalid action cell');
    }
-   const next=replay(first,p.commands as Command[],SYNTHETIC_PARAMS);
+   const next=replayWithGeography(first,p.commands as Command[],SYNTHETIC_PARAMS,geography);
    if(p.finalStateHash!==canonicalStateHash(next))throw new Error('Replay checksum mismatch');
    setState(next);setCommands(p.commands as Command[]);
    setMessage('Replay restored and verified against the authoritative engine.');
@@ -77,7 +80,7 @@ export default function Game(){
 
 
  function dispatch(action:Command){
-  const result=reduceWorld(state,action,SYNTHETIC_PARAMS);
+  const result=reduceWorldWithGeography(state,action,SYNTHETIC_PARAMS,geography);
   if(!result.accepted){setMessage(`Action rejected: ${result.message}`);return;}
   setState(result.state);
   setCommands(previous=>[...previous,action]);
@@ -131,12 +134,12 @@ export default function Game(){
      </>}
     </div>
     <SiteNavigator cells={cells} selectedId={selection} onSelect={setSelection}
-      isAvailable={cell=>state.cells[cell.id]?.improvement==='none'}/>
+      isAvailable={cell=>geography.get(cell.id)?.buildable===true && state.cells[cell.id]?.improvement==='none'}/>
     <div className="chapter"><span className="chapter-index">CHAPTER 02</span><strong>Development actions</strong></div>
     <div className="build-actions">
      {CHOICES.map(choice=><button key={choice.kind}
        aria-label={`Build ${choice.label}`}
-       disabled={!current || current.terrain==='water' || occupation?.improvement!=='none' || over || state.treasuryKeur<SYNTHETIC_PARAMS.actionCostKeur[choice.kind]}
+       disabled={!current || geography.get(current.id)?.buildable!==true || occupation?.improvement!=='none' || over || state.treasuryKeur<SYNTHETIC_PARAMS.actionCostKeur[choice.kind]}
        onClick={()=>build(choice)}>
        <span><b>{choice.label}</b><small>{choice.hint}</small></span><em>{SYNTHETIC_PARAMS.actionCostKeur[choice.kind]}k€</em>
       </button>)}
