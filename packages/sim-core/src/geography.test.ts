@@ -57,3 +57,16 @@ describe('source-geography bound building legality',()=>{
    .toThrow(/UNBUILDABLE_GEO_CELL/);
  });
 });
+
+it('rejects every construction verb on protected terrain without changing state',()=>{
+ const state=createSyntheticWorld();
+ const before=canonicalStateHash(state);
+ for(const kind of ['BUILD_HOUSING','BUILD_SOLAR','BUILD_WATER_REUSE'] as const){
+  for(const cellId of ['synthetic-0','synthetic-2']){
+   const result=reduceWorldWithGeography(state,{kind,cellId},SYNTHETIC_PARAMS,cells());
+   expect(result.accepted).toBe(false);
+   expect(canonicalStateHash(result.state)).toBe(before);
+   expect(canonicalStateHash(state)).toBe(before);
+  }
+ }
+});
