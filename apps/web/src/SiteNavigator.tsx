@@ -31,8 +31,8 @@ export function SiteNavigator({cells,selectedId,onSelect,isAvailable=()=>true}:P
       <button type="button" aria-label="Next buildable site" disabled={!eligible.length} onClick={()=>jump(1)}>Next ›</button>
     </div>
     <label htmlFor="site-picker">Select a sector by name</label>
-    <select id="site-picker" aria-label="Buildable territory" value={index>=0?selectedId??'':''} onChange={e=>onSelect(e.target.value)} disabled={!eligible.length}>
-      <option value="">Choose a buildable sector</option>
+    <select id="site-picker" aria-label="Buildable territory" value={index>=0?selectedId??'':''} onChange={e=>{if(eligible.some(c=>c.id===e.target.value))onSelect(e.target.value);}} disabled={!eligible.length}>
+      <option value="" disabled>Choose a buildable sector</option>
       {eligible.map(c=><option key={c.id} value={c.id}>Sector {c.q+1}–{c.r+1} · {c.terrain} (synthetic)</option>)}
     </select>
     <small>3D terrain and sector classes are synthetic; official Madrid data is not connected.</small>
