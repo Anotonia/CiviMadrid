@@ -70,3 +70,15 @@ test('refuses gaps larger than three quantization cells in a referenced arc',()=
  const t=topology();t.arcs[1][0]=[4,4];
  assert.throws(()=>topologyToGeoJSON(t),/Disconnected TopoJSON arcs/);
 });
+
+test('larger official seams require explicit bounded review tolerance',()=>{
+ const t=topology();
+ t.arcs[1][0]=[11,0];
+ assert.throws(()=>topologyToGeoJSON(t),/Disconnected TopoJSON arcs/);
+ const repairs=[];
+ const result=topologyToGeoJSON(t,entry=>repairs.push(entry),{maxBridgeSteps:30});
+ assert.equal(repairs.length,2);
+ assert.ok(repairs.every(r=>r.gapInQuantizationSteps>=11));
+ assert.deepEqual(validateMadridGeoJSON(result),[]);
+ assert.throws(()=>topologyToGeoJSON(t,()=>{},{maxBridgeSteps:31}),/Unapproved TopoJSON seam tolerance/);
+});
