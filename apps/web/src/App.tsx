@@ -9,6 +9,7 @@ const terrainName: Record<string,string> = {
 
 export default function App() {
   const [mode,setMode]=useState<'real'|'synthetic'>('real');
+ const [realDistrict,setRealDistrict]=useState('01');
   const [selectedId, setSelectedId] = useState<string|null>(null);
   const [hoveredId, setHoveredId] = useState<string|null>(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -37,7 +38,7 @@ export default function App() {
         </button>}
       </header>
 
-      {mode==='real'?<RealMadridExplorer/>:<main className="game">
+      {mode==='real'?<RealMadridExplorer selectedCode={realDistrict} onSelectDistrict={setRealDistrict}/>:<main className="game">
         <section className="world" aria-label="Interactive synthetic hexagonal world">
           <WorldScene selectedId={selectedId} onSelect={choose} onHover={setHoveredId}/>
           <div className="world-label top-left">
