@@ -171,3 +171,41 @@ test('sourced Madrid has a real Three.js 3D relief with explicitly schematic hei
   await expect(canvas).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+
+test('daylight palette uses light surfaces and preserves real/synthetic legibility',async({page})=>{
+  const errors:string[]=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/');
+  await expect(page.getByTestId('real-madrid-3d')).toBeVisible();
+  await expect(page.getByRole('button',{name:'3D GEOGRAPHY'})).toHaveAttribute('aria-pressed','true');
+  // Check computed styles, not just CSS declarations, so import/cascade errors fail.
+  const real=await page.evaluate(()=>{
+    const rgb=(selector:string,prop:'backgroundColor'|'color')=>{
+      const el=document.querySelector(selector);
+      if(!el)throw new Error('Missing daylight element '+selector);
+      const value=getComputedStyle(el)[prop];
+      const values=value.match(/[\d.]+/g)?.slice(0,3).map(Number);
+      if(!values||values.length!==3)throw new Error('Cannot read '+selector+' '+prop);
+      return values;
+    };
+    return {sidebarBg:rgb('.real-inspector','backgroundColor'),
+      sidebarText:rgb('.real-inspector','color'),
+      topbarBg:rgb('.shell .topbar','backgroundColor'),
+      overlayBg:rgb('.real-model-truth','backgroundColor')};
+  });
+  expect(real.sidebarBg.every(v=>v>=230)).toBe(true);
+  expect(real.sidebarText.every(v=>v<100)).toBe(true);
+  expect(real.topbarBg.every(v=>v>=230)).toBe(true);
+  expect(real.overlayBg.every(v=>v>=225)).toBe(true);
+  await page.screenshot({path:'test-results/real-madrid-daylight-3d.png',fullPage:true});
+  await page.getByRole('button',{name:'Play synthetic'}).click();
+  await expect(page.locator('.world canvas')).toBeVisible();
+  const synthetic=await page.locator('.inspector').evaluate(el=>getComputedStyle(el).backgroundColor);
+  expect(synthetic).toBe('rgb(243, 245, 239)');
+  await page.getByRole('button',{name:'Select buildable site'}).click();
+  await page.getByRole('button',{name:'Build Solar field'}).click();
+  await expect(page.locator('.game-stat').first()).toContainText('920');
+  await page.screenshot({path:'test-results/synthetic-daylight-build.png',fullPage:true});
+  expect(errors).toEqual([]);
+});
