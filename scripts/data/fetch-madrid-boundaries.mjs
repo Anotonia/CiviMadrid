@@ -18,10 +18,18 @@ export const RESOURCE = {
   downloadUrl: 'https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-3-limites-administrativos-mapas/download/900012-3-limites-administrativos-mapas.json',
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
   attributionText: 'Datos del Ayuntamiento de Madrid, licencia CC BY 4.0',
+  // Direct TopoJSON distribution from the official Geoportal, independently linked
+  // from the district resource 900012-3. It is NOT the census sections (900012-5).
+  geoportalTopoJSONUrl: 'https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/LIMITES_ADMINISTRATIVOS/Distritos/TopoJSON/Distritos.json',
 };
 
-export async function acquire(outDir, fetchFn = fetch) {
-  const response = await fetchFn(RESOURCE.downloadUrl, {
+export async function acquire(outDir, fetchFn = fetch, sourceUrl = RESOURCE.downloadUrl) {
+  // Only pinned official distributions are permitted: prevent arbitrary URL
+  // substitution from weakening the license/source manifest.
+  if (![RESOURCE.downloadUrl, RESOURCE.geoportalTopoJSONUrl].includes(sourceUrl)) {
+    throw new Error('Unapproved Madrid district distribution URL');
+  }
+  const response = await fetchFn(sourceUrl, {
     headers: {'User-Agent':'CiviMadrid-M0-Research/0.1 (source provenance audit)'},
     signal: AbortSignal.timeout(20000)
   });
@@ -45,7 +53,7 @@ export async function acquire(outDir, fetchFn = fetch) {
     sourceId: RESOURCE.sourceId,
     publisher: RESOURCE.publisher,
     datasetTitle: RESOURCE.datasetTitle,
-    downloadUrl: RESOURCE.downloadUrl,
+    downloadUrl: sourceUrl,
     licenseUrl: RESOURCE.licenseUrl,
     attributionText: RESOURCE.attributionText,
     dateRetrieved: now.slice(0,10),
@@ -63,7 +71,12 @@ export async function acquire(outDir, fetchFn = fetch) {
 }
 
 if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href) {
-  acquire(process.argv[2] ?? '.data-staging')
+  const flag = process.argv[3];
+  if (flag && flag !== '--geoportal') {
+    console.error('Usage: node scripts/data/fetch-madrid-boundaries.mjs [output-dir] [--geoportal]');
+    process.exitCode = 2;
+  } else acquire(process.argv[2] ?? '.data-staging', fetch,
+    flag === '--geoportal' ? RESOURCE.geoportalTopoJSONUrl : RESOURCE.downloadUrl)
     .then(({bytes,sha256}) => console.log(`Downloaded ${bytes} bytes; SHA256 ${sha256}; source geometry pending manual audit.`))
     .catch(e=>{console.error(e.message);process.exitCode=1;});
 }
