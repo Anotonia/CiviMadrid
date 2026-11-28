@@ -115,6 +115,7 @@ test('official Madrid Explore renders 21 sourced districts with provenance and n
   const errors:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
+  await page.getByRole('button',{name:'2D DISTRICTS'}).click();
   await expect(page.getByTestId('real-madrid-map')).toBeVisible();
   await expect(page.locator('.real-district')).toHaveCount(21);
   await expect(page.getByText('CONSTRUCTION LOCKED IN REAL EXPLORE')).toBeVisible();
@@ -128,6 +129,7 @@ test('official Madrid Explore renders 21 sourced districts with provenance and n
 
 test('real district selection is keyboard accessible and does not change synthetic turn state',async({page})=>{
   await page.goto('/');
+  await page.getByRole('button',{name:'2D DISTRICTS'}).click();
   await page.getByRole('button',{name:'Select Barajas official district'}).focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('.real-selection h3')).toHaveText('Barajas');
@@ -141,4 +143,31 @@ test('real district selection is keyboard accessible and does not change synthet
   await expect(page.locator('.real-selection h3')).toHaveText('Barajas');
   await page.getByRole('button',{name:'Play synthetic'}).click();
   await expect(page.locator('.game-stat').first()).toContainText('920');
+});
+
+
+test('sourced Madrid has a real Three.js 3D relief with explicitly schematic heights',async({page})=>{
+  const errors:string[]=[];
+  page.on('pageerror',err=>errors.push(err.message));
+  await page.goto('/');
+  await expect(page.getByRole('button',{name:'3D GEOGRAPHY'})).toHaveAttribute('aria-pressed','true');
+  await expect(page.getByTestId('real-madrid-3d')).toBeVisible();
+  const canvas=page.locator('.real-model-wrap canvas');
+  await expect(canvas).toBeVisible();
+  const webgl=await canvas.evaluate(node=>{
+    const c=node as HTMLCanvasElement;
+    const gl=c.getContext('webgl2')??c.getContext('webgl');
+    return Boolean(gl);
+  });
+  expect(webgl,'WebGL context must be available to render the district 3D mesh').toBe(true);
+  await expect(page.getByText('NO BUILDING MODELS OR OBSERVED HEIGHTS CONNECTED YET')).toBeVisible();
+  await expect(page.getByText('SCHEMATIC · NOT OBSERVED')).toBeVisible();
+  await page.getByRole('button',{name:'21 · Barajas'}).click();
+  await expect(page.locator('.real-selection h3')).toHaveText('Barajas');
+  await page.screenshot({path:'test-results/real-madrid-3d-relief.png',fullPage:true});
+  await page.getByRole('button',{name:'2D DISTRICTS'}).click();
+  await expect(page.locator('.real-district')).toHaveCount(21);
+  await page.getByRole('button',{name:'3D GEOGRAPHY'}).click();
+  await expect(canvas).toBeVisible();
+  expect(errors).toEqual([]);
 });
