@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,rm,appendFile} from 'node:fs/promises';
+import {mkdtemp,rm,appendFile,readFile} from 'node:fs/promises';
+import {auditTopoJSONSeams} from './topology-to-geojson.mjs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {acquire,RESOURCE} from './fetch-madrid-boundaries.mjs';
@@ -21,6 +22,8 @@ test('live official Madrid distrito distribution: 21 polygons, SHA256, WorldSnap
   try{
     const fetched=await acquire(dir,fetch,RESOURCE.geoportalTopoJSONUrl);
     console.log('Official district source fetched: '+fetched.bytes+' bytes; raw SHA256 '+fetched.sha256);
+    const raw=JSON.parse(await readFile(path.join(dir,'madrid-districts.raw.json'),'utf8'));
+    if(raw.type==='Topology')console.log('OFFICIAL TOPOLOGY SEAM AUDIT '+JSON.stringify(auditTopoJSONSeams(raw)));
     const geo=await convertStagedDistricts(dir);
     const snapshot=await buildAndWriteDistrictSnapshot(dir);
     assert.equal(geo.districtFeatureCount,21);
