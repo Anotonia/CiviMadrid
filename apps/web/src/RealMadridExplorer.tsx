@@ -84,10 +84,13 @@ function project(entries:ReturnType<typeof validateSource>):District[]{
     return {...x,path,cx,cy};
   });
 }
-export default function RealMadridExplorer(){
+type Props={selectedCode?:string;onSelectDistrict?:(code:string)=>void};
+export default function RealMadridExplorer({selectedCode,onSelectDistrict}:Props){
   const [districts,setDistricts]=useState<District[]>([]);
   const [error,setError]=useState<string|null>(null);
-  const [selected,setSelected]=useState('01');
+  const [localSelected,setLocalSelected]=useState('01');
+  const selected=selectedCode??localSelected;
+  const setSelected=(code:string)=>{setLocalSelected(code);onSelectDistrict?.(code)};
   const [filter,setFilter]=useState('');
   const [zoom,setZoom]=useState(1);
   const [offset,setOffset]=useState<Position>([0,0]);
