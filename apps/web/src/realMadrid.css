@@ -1,0 +1,185 @@
+.real-layout{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:calc(100vh - 92px);background:#101f2a}
+.real-world{height:100%;min-height:820px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 48% 47%,#34515a 0%,#203844 55%,#102631 100%);isolation:isolate}
+.real-world:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(#9db2b20d 1px,transparent 1px),linear-gradient(90deg,#9db2b20d 1px,transparent 1px);background-size:45px 45px;opacity:.5}
+.real-world:after{content:"";position:absolute;inset:0;pointer-events:none;pointer-events:none;background:linear-gradient(180deg,#0f2431a8 0%,transparent 23%,transparent 65%,#0b172680)}
+.real-map-heading{position:absolute;top:22px;left:23px;max-width:425px;pointer-events:none;z-index:2;padding:14px 18px 18px;border-left:2px solid #d4ae73;background:linear-gradient(90deg,#0e2736ef 0%,#0e2736a4 68%,transparent 100%)}
+.real-overline{font:700 10px 'DM Sans',system-ui,sans-serif;letter-spacing:.15em;color:#e3c18f}
+.real-map-heading h2{color:#f4e8d4;font:400 clamp(29px,3vw,44px)/1.07 Georgia,serif;letter-spacing:-.03em;margin:12px 0}
+.real-map-heading p{color:#bad0d4;font-size:12px;line-height:1.55;max-width:320px}
+.real-svg{width:100%;height:100%;touch-action:none;position:absolute;inset:0;z-index:1;cursor:grab}
+.real-svg:active{cursor:grabbing}
+.real-district{stroke:#c0d5d4;stroke-width:1;stroke-opacity:.55;vector-effect:non-scaling-stroke;transition:fill .16s,stroke .16s;cursor:pointer}
+.real-district:hover,.real-district:focus-visible{fill:#789d9b!important;stroke:#e6d9b7;stroke-width:2;outline:none}
+.real-district.selected{stroke:#f8dfab;stroke-width:2.5;stroke-opacity:1;filter:drop-shadow(0 0 8px #d4ae6878)}
+.real-selected-marker{pointer-events:none;fill:#fff0d3;font:700 15px 'Space Grotesk',sans-serif;paint-order:stroke;stroke:#123042;stroke-width:3}
+.real-zoom{position:absolute;top:25px;right:28px;display:grid;gap:6px;z-index:3}
+.real-zoom button{background:#122c38d9;border:1px solid #6c8490;color:#eaf1ed;width:37px;height:37px;font-size:20px;cursor:pointer}
+.real-zoom button:hover{background:#42626d}
+.real-zoom button:focus-visible,.real-search:focus-visible,.real-districts button:focus-visible{outline:2px solid #e8c793;outline-offset:2px}
+.real-legend{position:absolute;z-index:3;bottom:25px;left:25px;right:25px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;gap:15px;background:#102633e8;border:1px solid #5b7782;backdrop-filter:blur(8px);color:#e4e6df;font-size:12px}
+.real-legend strong{font-size:10px;letter-spacing:.10em;color:#e4c18b}
+.real-inspector{background:#172a38;border-left:1px solid #3b5161;display:flex;flex-direction:column;gap:18px;padding:29px 26px 24px;min-width:0}
+.real-inspector h2{font:400 36px/1.1 Georgia,serif;letter-spacing:-.03em;color:#f2e7d2}
+.real-inspector .lead{font-size:13px}
+.real-search{width:100%;background:#102634;border:1px solid #506e79;color:#e6eee8;padding:12px 14px;font-size:12px;border-radius:0}
+.real-search::placeholder{color:#94a9b5}
+.real-districts{min-height:130px;max-height:210px;overflow:auto;display:grid;align-content:start;gap:4px;scrollbar-color:#506674 #142633}
+.real-districts button{background:#1d3440;color:#dae4e2;border:1px solid #344d5b;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 10px;font-size:12px;text-align:left;cursor:pointer}
+.real-districts button small{color:#9baeb0;font-size:9px}
+.real-districts button.active{border-color:#d6b77f;background:#344852;color:#f9eed8}
+.real-selection{padding:18px;background:#223c48;border:1px solid #516b79}
+.real-selection h3{margin:8px 0;font:400 27px Georgia,serif}
+.real-truth{padding:13px 15px;border:1px solid #63797c;background:#18313c;font-size:11px;line-height:1.7;color:#bdcdd0}
+.real-truth b{font-size:10px;color:#edce9d;letter-spacing:.1em}
+.real-truth p{margin:8px 0}
+.real-truth code{overflow-wrap:anywhere;font-size:9px;color:#e4d7b8}
+.real-truth a{color:#f0d09c}
+.real-locked{background:#2c3030;border-left:3px solid #cfae73;padding:12px;color:#e1d3b8}
+.real-locked strong{font-size:11px;letter-spacing:.08em}
+.real-locked p{font-size:11px;line-height:1.6;margin-top:5px}
+.real-map-error,.real-map-loading{position:absolute;z-index:4;top:41%;left:10%;right:10%;padding:23px;background:#142b36eb;border:1px solid #967b59;font-size:14px;line-height:1.7;color:#e8c99a}
+.real-map-error p{margin-top:7px}
+.real-map-loading{border-color:#55877e;color:#b9d6d3}
+.mode-toggle{display:flex;gap:6px;align-items:center;justify-content:center;margin-left:auto}
+.mode-toggle button{background:#1d3442;border:1px solid #46616b;color:#b7c8c9;padding:9px 12px;font-size:11px;letter-spacing:.05em}
+.mode-toggle button.active{background:#b49a72;color:#122631;border-color:#e2c48e;font-weight:700}
+@media(max-width:1100px){.real-layout{grid-template-columns:minmax(0,1fr) 320px}.real-inspector{padding:22px 18px}.real-map-heading h2{font-size:31px}}
+@media(max-width:880px){.real-layout{grid-template-columns:1fr}.real-world{height:65vh;min-height:510px}.real-inspector{border-left:0;border-top:1px solid #3b5161}.real-map-heading{left:18px;top:18px}.real-map-heading h2{font-size:27px}.real-map-heading p{max-width:245px}.real-legend{left:9px;right:9px;bottom:9px;font-size:10px}.real-legend strong{font-size:9px}}
+@media(max-width:620px){.mode-toggle{margin:0}.mode-toggle button{padding:7px;font-size:9px}.real-world{height:58vh;min-height:440px}.real-zoom{top:14px;right:13px}.real-zoom button{width:32px;height:32px}.real-overline{font-size:8px;max-width:240px;display:block}.real-map-heading h2{font-size:24px}.real-map-heading p{display:none}.real-legend{flex-wrap:wrap;gap:3px}}
+@media(prefers-reduced-motion:reduce){.real-district{transition:none}}
+
+
+/* Real 3D district relief. Topology is sourced; polygon depth is conceptual. */
+.real-model-wrap{position:absolute;inset:0;z-index:1;overflow:hidden}
+.real-model-wrap canvas{display:block;width:100%;height:100%;touch-action:none}
+.real-view-switcher{position:absolute;z-index:5;top:255px;left:25px;display:flex;gap:6px;max-width:calc(100% - 85px)}
+.real-view-switcher button{padding:10px 13px;background:#102634ef;color:#c1d0d0;border:1px solid #6c8490;letter-spacing:.065em;font-size:10px;white-space:nowrap;cursor:pointer}
+.real-view-switcher button.active{background:#d6b57e;color:#132733;border-color:#e7ca94;font-weight:700}
+.real-view-switcher button:focus-visible{outline:2px solid #ffe4af;outline-offset:3px}
+.real-model-truth{position:absolute;right:23px;top:210px;max-width:262px;display:grid;gap:5px;text-align:right;padding:10px 14px;background:#102836e0;color:#d9e8e4;border:1px solid #9a886a86;pointer-events:none;font-size:10px}
+.real-model-truth b{letter-spacing:.13em;color:#ecd1a3}
+.real-model-truth span{font-size:9px;letter-spacing:.055em}
+.real-model-truth small{font-size:9px;color:#c7ae8d;line-height:1.55}
+.real-model-help{position:absolute;z-index:3;bottom:93px;left:24px;padding:8px 11px;background:#0d2430ce;color:#b5cbc8;font-size:10px;letter-spacing:.08em;pointer-events:none}
+@media(max-width:880px){.real-view-switcher{top:132px;left:18px}.real-model-truth{right:10px;top:190px;max-width:205px}.real-model-help{bottom:83px;left:13px;font-size:9px}}
+@media(max-width:620px){.real-view-switcher{top:101px;left:11px}.real-view-switcher button{font-size:9px;padding:7px}.real-model-truth{top:auto;bottom:97px;right:10px;max-width:165px;font-size:9px}.real-model-truth small{display:none}.real-model-help{display:none}}
+
+
+/* Keep the 3D camera centered in the visible viewport instead of stretching
+   the canvas to the much taller inspector sidebar. The side panel scrolls. */
+@media(min-width:881px){
+ .real-layout{height:calc(100vh - 92px);min-height:640px;align-items:stretch}
+ .real-world{height:100%;min-height:640px}
+ .real-inspector{max-height:100%;overflow:auto;scrollbar-color:#526b76 #172a38}
+}
+@media(max-width:880px){
+ .real-view-switcher{top:190px}
+ .real-model-truth{top:205px}
+}
+@media(max-width:620px){
+ .real-view-switcher{top:195px}
+ .real-model-truth{top:auto}
+}
+
+
+/* Daylight city-planning exhibition palette — legible desktop/mobile overlays.
+   No implied change to sourced geography or 3D district model semantics. */
+.real-layout{background:#e8efeb;color:#213942}
+.real-world{
+  background:radial-gradient(ellipse at 48% 42%,#edf4ef 0%,#d1e2e4 54%,#b5cdd6 100%);
+}
+.real-world:before{
+  background-image:linear-gradient(#46666c12 1px,transparent 1px),linear-gradient(90deg,#46666c12 1px,transparent 1px);
+}
+.real-world:after{
+  background:linear-gradient(180deg,#ebf2ed80 0%,transparent 25%,transparent 72%,#e0eae8a6 100%);
+}
+.real-map-heading{
+  background:linear-gradient(90deg,#f8faf2ed 0%,#f7faf1c9 72%,#f7faf100 100%);
+  border-left:3px solid #b98d52;
+  box-shadow:0 10px 24px #48646b18;
+}
+.real-map-heading h2{color:#243d43;text-shadow:none}
+.real-map-heading p{color:#4d676c}
+.real-overline{color:#946731}
+.real-view-switcher button{
+  background:#f7faf1ed;color:#3b5960;border-color:#94b1b2;
+  box-shadow:0 4px 12px #38576017;
+}
+.real-view-switcher button:hover{background:#e5efeb}
+.real-view-switcher button.active{
+  background:#eac18a;color:#243942;border-color:#c29252;
+}
+.real-model-truth{
+  background:#f7faf1ed;color:#38535a;border-color:#bdab87;
+  box-shadow:0 10px 20px #58727b18;
+}
+.real-model-truth b{color:#805925}
+.real-model-truth span{color:#425e61}
+.real-model-truth small{color:#875f2f}
+.real-model-help{
+  background:#f5f8f0df;color:#466167;border:1px solid #aec5c1;
+}
+.real-legend{
+  background:#f7faf1ed;color:#344b51;border-color:#a6bcba;
+  box-shadow:0 7px 22px #3459681f;
+}
+.real-legend strong{color:#865d2a}
+.real-zoom button{
+  background:#f7faf1f0;color:#31525b;border-color:#9bb8bb;
+}
+.real-zoom button:hover{background:#dce9e5}
+.real-district{stroke:#f6faf3;stroke-opacity:.9}
+.real-district:hover,.real-district:focus-visible{
+  fill:#b0d1bf!important;stroke:#9b773b;
+}
+.real-district.selected{stroke:#a67a39}
+.real-selected-marker{fill:#4a5141;stroke:#f2f5e8}
+.real-inspector{
+  background:#f4f4ed;color:#273d43;border-left-color:#c1ceca;
+}
+.real-inspector h2{color:#263e44}
+.real-inspector .eyebrow{color:#946a37}
+.real-inspector .lead,.real-inspector .hint{color:#536b70}
+.real-inspector .chapter{border-top-color:#bdcecb}
+.real-inspector .chapter-index{color:#667c7c}
+.real-inspector .chapter strong{color:#324a50}
+.real-inspector .chip{color:#2e6353;border-color:#98bfb0;background:#e2eee4}
+.real-search{
+  background:#fffef9;color:#273f46;border-color:#a6bcb9;
+}
+.real-search::placeholder{color:#6e8385}
+.real-districts{scrollbar-color:#b6cac3 #edf1e9}
+.real-districts button{
+  background:#fffef9;color:#30494e;border-color:#d1ded7;
+}
+.real-districts button small{color:#698081}
+.real-districts button:hover{background:#e6f0e9;border-color:#9db7b0}
+.real-districts button.active{
+  background:#f5e6ca;color:#343e3b;border-color:#b78e58;
+}
+.real-selection{
+  background:#e9f1e8;color:#284348;border-color:#b4ccc1;
+}
+.real-selection h3{color:#29454a}
+.real-selection .property{border-bottom-color:#b9ccc6}
+.real-selection .property span{color:#557072}
+.real-selection .property strong{color:#274e53}
+.real-truth{
+  background:#eef4ee;color:#4e666a;border-color:#bfd0c5;
+}
+.real-truth b{color:#845b2b}
+.real-truth code{color:#405e63}
+.real-truth a{color:#795729}
+.real-locked{
+  background:#fff0d6;color:#604c30;border-left-color:#bb8b46;
+}
+.real-locked strong{color:#60451d}
+.real-locked p{color:#715a3c}
+.real-inspector .inspector-footer{color:#718385;border-top-color:#c8d7ce}
+.real-map-loading,.real-map-error{
+  background:#fafaf2f0;color:#3f5558;border-color:#b18f5e;
+}
+@media(max-width:880px){
+ .real-inspector{border-top:1px solid #c1ceca}
+}
