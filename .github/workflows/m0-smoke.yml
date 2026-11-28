@@ -129,3 +129,41 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
+
+
+  # Independent QA of the integration candidate. Read-only checkout: PR #13
+  # must not be merged or deployed merely because this job succeeds.
+  real-madrid-browser-audit:
+    if: github.event_name == 'pull_request' && github.head_ref == 'agent/qa-gis-source-audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout pinned integrated playable candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 0af27a4153a2c8c9906db13438cb1180801b4d0b
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify offline preview provenance and full TypeScript web build
+        run: |
+          cd apps/web
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Run independent browser Playwright gameplay and sourced-map acceptance
+        run: |
+          cd tests/e2e
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npm test
+      - name: Upload real browser screenshot and trace evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: civimadrid-real-district-browser-evidence
+          path: |
+            tests/e2e/test-results/
+            tests/e2e/playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
