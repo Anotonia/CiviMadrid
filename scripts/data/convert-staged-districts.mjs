@@ -13,9 +13,9 @@ import {topologyToGeoJSON,requireMadridWGS84} from './topology-to-geojson.mjs';
 import {validateMadridGeoJSON} from './validate-madrid-geometry.mjs';
 import {validateManifest} from './validate-manifest.mjs';
 
-export function normalizeDistricts(source) {
+export function normalizeDistricts(source, onBoundedBridge = null) {
  const features=source?.type==='Topology'
-   ?topologyToGeoJSON(source)
+   ?topologyToGeoJSON(source,onBoundedBridge)
    :source;
  return requireMadridWGS84(features,validateMadridGeoJSON);
 }
@@ -36,7 +36,8 @@ export async function convertStagedDistricts(dir) {
    throw new Error('Wrong source identifier: expected official district distribution 900012-3');
  }
  const source=JSON.parse(raw.toString('utf8'));
- const collection=normalizeDistricts(source);
+ const boundedBridges=[];
+ const collection=normalizeDistricts(source,bridge=>boundedBridges.push(bridge));
  const bounds=geometryBounds(collection);
  const output=Buffer.from(JSON.stringify(collection));
  const derived={
@@ -48,9 +49,11 @@ export async function convertStagedDistricts(dir) {
    geometryKind:'district administrative boundaries',
    nativeGrain:'district',
    districtFeatureCount:collection.features.length,
+   boundedArcBridgeCount:boundedBridges.length,
+   maxArcBridgeQuantizationSteps:boundedBridges.length?Math.max(...boundedBridges.map(b=>b.gapInQuantizationSteps)):0,
    bounds,
-   caveat:'Geometric range and structure verified, but source date, semantics, polygons and licensing must still receive GIS review before release.',
-   transformVersion:'topojson-to-wgs84-v0.1',
+   caveat:'Source may contain recorded short arc/ring seams bridged by straight segments (<=3 quantization steps) without moving source vertices. Full topology, native CRS, source-date and licensing review still required before release.',
+   transformVersion:'topojson-to-wgs84-bounded-seams-v0.2',
    sourcePage:'https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-3-limites-administrativos-mapas'
  };
  await writeFile(path.join(dir,'madrid-districts.wgs84.geojson'),output);
