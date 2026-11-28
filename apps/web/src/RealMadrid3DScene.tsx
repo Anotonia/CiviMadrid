@@ -48,8 +48,8 @@ function DistrictExtrusion({
     });
   },[district.screenRings]);
   useEffect(()=>()=>geometry.dispose(),[geometry]);
-  const palette=['#618990','#729997','#69847f','#527b86'];
-  const color=selected?'#d8b27b':hovered?'#a1c0b9':palette[Number(district.code)%palette.length];
+  const palette=['#a8c9c4','#9bbdc4','#bfceb3','#a9c5b6'];
+  const color=selected?'#f0c386':hovered?'#d9e8d9':palette[Number(district.code)%palette.length];
   return <mesh
     name={'Madrid district '+district.code+' '+district.name}
     geometry={geometry}
@@ -65,8 +65,8 @@ function DistrictExtrusion({
       color={color}
       roughness={0.78}
       metalness={0.06}
-      emissive={selected?'#966530':'#000000'}
-      emissiveIntensity={selected?0.19:0}
+      emissive={selected?'#ad7a3d':'#000000'}
+      emissiveIntensity={selected?0.15:0}
       side={THREE.DoubleSide}
     />
   </mesh>;
@@ -87,19 +87,19 @@ export default function RealMadrid3DScene({
       gl={{antialias:true,alpha:false}}
       onPointerMissed={()=>{}}
     >
-      <color attach="background" args={['#243f4b']}/>
-      <fog attach="fog" args={['#243f4b',45,105]}/>
-      <ambientLight intensity={0.95}/>
-      <hemisphereLight args={['#e1e9e2','#263a36',1.45]}/>
+      <color attach="background" args={['#bbd3dc']}/>
+      <fog attach="fog" args={['#d7e5e8',48,120]}/>
+      <ambientLight intensity={1.12}/>
+      <hemisphereLight args={['#fff9ee','#92a9a0',1.6]}/>
       <directionalLight
-        position={[16,28,12]} intensity={3.1} castShadow
+        position={[16,28,12]} intensity={3.25} castShadow
         shadow-mapSize={[1024,1024]}
       />
       <mesh position={[0,-0.17,0]} rotation={[-Math.PI/2,0,0]} receiveShadow>
         <planeGeometry args={[53,44]}/>
-        <meshStandardMaterial color="#1e3944" roughness={1}/>
+        <meshStandardMaterial color="#dce6e2" roughness={1}/>
       </mesh>
-      <gridHelper args={[48,48,'#40646d','#345360']} position={[0,-0.14,0]}/>
+      <gridHelper args={[48,48,'#b4c6c6','#cbdad6']} position={[0,-0.14,0]}/>
       {districts.map(d=><DistrictExtrusion
         key={d.code} district={d} selected={selected===d.code} onSelect={onSelect}
       />)}
