@@ -48,8 +48,8 @@ function DistrictExtrusion({
     });
   },[district.screenRings]);
   useEffect(()=>()=>geometry.dispose(),[geometry]);
-  const palette=['#a8c9c4','#9bbdc4','#bfceb3','#a9c5b6'];
-  const color=selected?'#f0c386':hovered?'#d9e8d9':palette[Number(district.code)%palette.length];
+  const palette=['#75a4a0','#78a4ad','#96b293','#86a99f'];
+  const color=selected?'#dfa960':hovered?'#b4d7c6':palette[Number(district.code)%palette.length];
   return <mesh
     name={'Madrid district '+district.code+' '+district.name}
     geometry={geometry}
@@ -63,10 +63,10 @@ function DistrictExtrusion({
   >
     <meshStandardMaterial
       color={color}
-      roughness={0.78}
-      metalness={0.06}
-      emissive={selected?'#ad7a3d':'#000000'}
-      emissiveIntensity={selected?0.15:0}
+      roughness={0.86}
+      metalness={0.02}
+      emissive={selected?'#99642f':'#000000'}
+      emissiveIntensity={selected?0.11:0}
       side={THREE.DoubleSide}
     />
   </mesh>;
@@ -88,11 +88,11 @@ export default function RealMadrid3DScene({
       onPointerMissed={()=>{}}
     >
       <color attach="background" args={['#bbd3dc']}/>
-      <fog attach="fog" args={['#d7e5e8',48,120]}/>
-      <ambientLight intensity={1.12}/>
-      <hemisphereLight args={['#fff9ee','#92a9a0',1.6]}/>
+      <fog attach="fog" args={['#d7e5e8',66,145]}/>
+      <ambientLight intensity={0.82}/>
+      <hemisphereLight args={['#fff9ee','#92a9a0',1.2]}/>
       <directionalLight
-        position={[16,28,12]} intensity={3.25} castShadow
+        position={[16,28,12]} intensity={2.25} castShadow
         shadow-mapSize={[1024,1024]}
       />
       <mesh position={[0,-0.17,0]} rotation={[-Math.PI/2,0,0]} receiveShadow>
