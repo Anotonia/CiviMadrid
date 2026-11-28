@@ -16,7 +16,7 @@ jobs:
       - name: Checkout pinned GeoData implementation, not main or a floating head
         uses: actions/checkout@v4
         with:
-          ref: a38eeaf28239a50da503bd8994d6f8c17b515701
+          ref: bd11c30b10bcc5db1322beb10c5a1f7cfc423cb6
           persist-credentials: false
       - name: Install Node 22
         uses: actions/setup-node@v4
