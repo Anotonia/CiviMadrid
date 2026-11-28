@@ -58,7 +58,7 @@ export function topologyToGeoJSON(topology) {
       const arc=getArc(idx);
       if(points.length){
         const prev=points[points.length-1], start=arc[0];
-        if(prev[0]!==start[0]||prev[1]!==start[1])throw new Error('Disconnected TopoJSON arcs');
+        if(prev[0]!==start[0]||prev[1]!==start[1])throw new Error('Disconnected TopoJSON arcs: index '+idx+'; previous='+JSON.stringify(prev)+' next='+JSON.stringify(start)+' delta='+JSON.stringify([start[0]-prev[0],start[1]-prev[1]]));
         points.push(...arc.slice(1));
       }else points.push(...arc);
     }
