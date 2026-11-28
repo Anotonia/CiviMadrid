@@ -119,6 +119,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: madrid-gis-district-raw-and-snapshot
-          path: .data-staging/madrid-districts.*
-          if-no-files-found: warn
+          path: |
+            .data-staging/madrid-districts.raw.json
+            .data-staging/madrid-districts.manifest.json
+            .data-staging/madrid-districts.wgs84.geojson
+            .data-staging/madrid-districts.geometry-report.json
+            .data-staging/madrid-districts.world-snapshot.json
+            .data-staging/madrid-districts.snapshot-report.json
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 7
