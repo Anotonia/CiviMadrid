@@ -1,0 +1,79 @@
+name: Madrid official GIS acquisition audit (non-release)
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-district-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout pinned GeoData implementation, not main or a floating head
+        uses: actions/checkout@v4
+        with:
+          ref: c8d24c5b743bfb74e53e3077bf24e9f19d720583
+          persist-credentials: false
+      - name: Install Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: GeoData offline test suite
+        run: node --test scripts/data/*.test.mjs
+      - name: Fetch one official Madrid district TopoJSON into quarantine
+        run: |
+          set -euo pipefail
+          node scripts/data/fetch-madrid-boundaries.mjs .data-staging --geoportal
+          node scripts/data/validate-manifest.mjs .data-staging/madrid-districts.manifest.json .data-staging/madrid-districts.raw.json
+      - name: Convert only after SHA256, geometry and WGS84 bounds checks
+        run: |
+          set -euo pipefail
+          node scripts/data/convert-staged-districts.mjs .data-staging
+      - name: Assert official district cardinality and report provenance
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const p='.data-staging/';
+          const manifest=JSON.parse(fs.readFileSync(p+'madrid-districts.manifest.json','utf8'));
+          const report=JSON.parse(fs.readFileSync(p+'madrid-districts.geometry-report.json','utf8'));
+          const featureCollection=JSON.parse(fs.readFileSync(p+'madrid-districts.wgs84.geojson','utf8'));
+          assert.equal(manifest.sourceId,'madrid-district-boundaries-900012-3');
+          assert.match(manifest.downloadUrl,/geoportal\.madrid\.es\/.*\/Distritos\/TopoJSON\/Distritos\.json$/);
+          assert.equal(manifest.licenseUrl,'https://creativecommons.org/licenses/by/4.0/');
+          assert.equal(report.districtFeatureCount,21,'The official 21 district polygons must be present');
+          assert.equal(featureCollection.features.length,21);
+          const codes=featureCollection.features.map(f=>String(f.properties?.COD_DIS||''));
+          const names=featureCollection.features.map(f=>String(f.properties?.NOMBRE||''));
+          assert.equal(new Set(codes).size,21,'District IDs must be unique');
+          assert.ok(names.includes('Centro')&&names.includes('Barajas'),'Official district names missing');
+          const msg=[
+            '# Madrid official district acquisition (quarantined M1 input)',
+            'Source: '+manifest.downloadUrl,
+            'License declaration: '+manifest.licenseUrl,
+            'Raw SHA256: '+manifest.fileSha256,
+            'Converted SHA256: '+report.geojsonSha256,
+            'District polygons: '+report.districtFeatureCount,
+            'BBox WGS84: '+JSON.stringify(report.bounds),
+            'Source representation: TopoJSON delta arcs; coordinates validated within Madrid longitude/latitude bounds.',
+            'No buildable hexes or measured utility values inferred. Manual GIS/legal review required before game release.'
+          ].join('\n');
+          console.log(msg);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,msg+'\n');
+          NODE
+      - name: Preserve official bytes and checksummed geometry report for human review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: madrid-district-raw-and-geojson-audit
+          path: |
+            .data-staging/madrid-districts.raw.json
+            .data-staging/madrid-districts.manifest.json
+            .data-staging/madrid-districts.wgs84.geojson
+            .data-staging/madrid-districts.geometry-report.json
+          if-no-files-found: warn
+          retention-days: 7
