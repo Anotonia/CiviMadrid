@@ -80,3 +80,106 @@
  .real-view-switcher{top:195px}
  .real-model-truth{top:auto}
 }
+
+
+/* Daylight city-planning exhibition palette — legible desktop/mobile overlays.
+   No implied change to sourced geography or 3D district model semantics. */
+.real-layout{background:#e8efeb;color:#213942}
+.real-world{
+  background:radial-gradient(ellipse at 48% 42%,#edf4ef 0%,#d1e2e4 54%,#b5cdd6 100%);
+}
+.real-world:before{
+  background-image:linear-gradient(#46666c12 1px,transparent 1px),linear-gradient(90deg,#46666c12 1px,transparent 1px);
+}
+.real-world:after{
+  background:linear-gradient(180deg,#ebf2ed80 0%,transparent 25%,transparent 72%,#e0eae8a6 100%);
+}
+.real-map-heading{
+  background:linear-gradient(90deg,#f8faf2ed 0%,#f7faf1c9 72%,#f7faf100 100%);
+  border-left:3px solid #b98d52;
+  box-shadow:0 10px 24px #48646b18;
+}
+.real-map-heading h2{color:#243d43;text-shadow:none}
+.real-map-heading p{color:#4d676c}
+.real-overline{color:#946731}
+.real-view-switcher button{
+  background:#f7faf1ed;color:#3b5960;border-color:#94b1b2;
+  box-shadow:0 4px 12px #38576017;
+}
+.real-view-switcher button:hover{background:#e5efeb}
+.real-view-switcher button.active{
+  background:#eac18a;color:#243942;border-color:#c29252;
+}
+.real-model-truth{
+  background:#f7faf1ed;color:#38535a;border-color:#bdab87;
+  box-shadow:0 10px 20px #58727b18;
+}
+.real-model-truth b{color:#805925}
+.real-model-truth span{color:#425e61}
+.real-model-truth small{color:#875f2f}
+.real-model-help{
+  background:#f5f8f0df;color:#466167;border:1px solid #aec5c1;
+}
+.real-legend{
+  background:#f7faf1ed;color:#344b51;border-color:#a6bcba;
+  box-shadow:0 7px 22px #3459681f;
+}
+.real-legend strong{color:#865d2a}
+.real-zoom button{
+  background:#f7faf1f0;color:#31525b;border-color:#9bb8bb;
+}
+.real-zoom button:hover{background:#dce9e5}
+.real-district{stroke:#f6faf3;stroke-opacity:.9}
+.real-district:hover,.real-district:focus-visible{
+  fill:#b0d1bf!important;stroke:#9b773b;
+}
+.real-district.selected{stroke:#a67a39}
+.real-selected-marker{fill:#4a5141;stroke:#f2f5e8}
+.real-inspector{
+  background:#f4f4ed;color:#273d43;border-left-color:#c1ceca;
+}
+.real-inspector h2{color:#263e44}
+.real-inspector .eyebrow{color:#946a37}
+.real-inspector .lead,.real-inspector .hint{color:#536b70}
+.real-inspector .chapter{border-top-color:#bdcecb}
+.real-inspector .chapter-index{color:#667c7c}
+.real-inspector .chapter strong{color:#324a50}
+.real-inspector .chip{color:#2e6353;border-color:#98bfb0;background:#e2eee4}
+.real-search{
+  background:#fffef9;color:#273f46;border-color:#a6bcb9;
+}
+.real-search::placeholder{color:#6e8385}
+.real-districts{scrollbar-color:#b6cac3 #edf1e9}
+.real-districts button{
+  background:#fffef9;color:#30494e;border-color:#d1ded7;
+}
+.real-districts button small{color:#698081}
+.real-districts button:hover{background:#e6f0e9;border-color:#9db7b0}
+.real-districts button.active{
+  background:#f5e6ca;color:#343e3b;border-color:#b78e58;
+}
+.real-selection{
+  background:#e9f1e8;color:#284348;border-color:#b4ccc1;
+}
+.real-selection h3{color:#29454a}
+.real-selection .property{border-bottom-color:#b9ccc6}
+.real-selection .property span{color:#557072}
+.real-selection .property strong{color:#274e53}
+.real-truth{
+  background:#eef4ee;color:#4e666a;border-color:#bfd0c5;
+}
+.real-truth b{color:#845b2b}
+.real-truth code{color:#405e63}
+.real-truth a{color:#795729}
+.real-locked{
+  background:#fff0d6;color:#604c30;border-left-color:#bb8b46;
+}
+.real-locked strong{color:#60451d}
+.real-locked p{color:#715a3c}
+.real-inspector .inspector-footer{color:#718385;border-top-color:#c8d7ce}
+.real-map-loading,.real-map-error{
+  background:#fafaf2f0;color:#3f5558;border-color:#b18f5e;
+}
+@media(max-width:880px){
+ .real-inspector{border-top:1px solid #c1ceca}
+}
