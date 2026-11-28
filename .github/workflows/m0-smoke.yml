@@ -71,7 +71,7 @@ jobs:
       - name: Checkout pinned GeoData revision
         uses: actions/checkout@v4
         with:
-          ref: cd020fc0b92407718b5c21f0a622f9f0369bdf36
+          ref: 56c03f5c73df797613c90f2ac5a63e80640275da
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
