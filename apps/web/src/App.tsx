@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { WorldScene, syntheticCells } from './world';
+import RealMadridExplorer from './RealMadridExplorer';
 
 const terrainName: Record<string,string> = {
   urban:'Urban fabric', forest:'Woodland', park:'Green area',
@@ -7,6 +8,7 @@ const terrainName: Record<string,string> = {
 };
 
 export default function App() {
+  const [mode,setMode]=useState<'real'|'synthetic'>('real');
   const [selectedId, setSelectedId] = useState<string|null>(null);
   const [hoveredId, setHoveredId] = useState<string|null>(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -23,15 +25,19 @@ export default function App() {
         </div>
         <div className="headline-status">
           <span className="status-beacon" />
-          <span>WORLD PROTOTYPE</span>
-          <strong>SPATIAL SPIKE / M0</strong>
+          <span>{mode==='real'?'OFFICIAL DISTRICT EXPLORE':'WORLD PROTOTYPE'}</span>
+          <strong>{mode==='real'?'SOURCE-DERIVED / M1':'SYNTHETIC / M0'}</strong>
         </div>
-        <button className="plain-button" onClick={()=>setShowInfo(x=>!x)} aria-expanded={showInfo}>
+        <div className="mode-toggle" role="group" aria-label="World mode">
+          <button type="button" className={mode==='real'?'active':''} onClick={()=>setMode('real')} aria-pressed={mode==='real'}>Real Madrid</button>
+          <button type="button" className={mode==='synthetic'?'active':''} onClick={()=>setMode('synthetic')} aria-pressed={mode==='synthetic'}>Synthetic M0</button>
+        </div>
+        {mode==='synthetic'&&<button className="plain-button" onClick={()=>setShowInfo(x=>!x)} aria-expanded={showInfo}>
           {showInfo ? 'Close details' : 'About this prototype'}
-        </button>
+        </button>}
       </header>
 
-      <main className="game">
+      {mode==='real'?<RealMadridExplorer/>:<main className="game">
         <section className="world" aria-label="Interactive synthetic hexagonal world">
           <WorldScene selectedId={selectedId} onSelect={choose} onHover={setHoveredId}/>
           <div className="world-label top-left">
@@ -84,7 +90,7 @@ export default function App() {
           )}
           <footer className="inspector-footer">CIVIMADRID / ENGINEERING EDITION <span>v0.1 · M0</span></footer>
         </aside>
-      </main>
+      </main>}
     </div>
   );
 }
