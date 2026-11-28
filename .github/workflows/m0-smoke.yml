@@ -141,7 +141,7 @@ jobs:
       - name: Checkout pinned integrated playable candidate
         uses: actions/checkout@v4
         with:
-          ref: 0be597dbbf5a7accb80ccad025b155e7eb043bee
+          ref: 2d5891a52942b20a3f13d42dda7c30747f9a9b1a
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
