@@ -4,6 +4,7 @@ test('3D world accepts a legal build action and advances the deterministic quart
   const pageErrors:string[]=[];
   page.on('pageerror',error=>pageErrors.push(error.message));
   await page.goto('/');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
   await expect(page.getByRole('heading',{name:'CiviMadrid'})).toBeVisible();
   await expect(page.getByText('SYNTHETIC TERRAIN & GAME ECONOMY')).toBeVisible();
   await expect(page.locator('canvas')).toHaveCount(1);
@@ -27,6 +28,7 @@ test('3D world accepts a legal build action and advances the deterministic quart
 
 test('rejects duplicate construction and preserves treasury',async({page})=>{
   await page.goto('/');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
   await page.getByRole('button',{name:'Select buildable site'}).click();
   await page.getByRole('button',{name:'Build Water recovery'}).click();
   await expect(page.locator('.game-stat').first()).toContainText('900');
@@ -36,6 +38,7 @@ test('rejects duplicate construction and preserves treasury',async({page})=>{
 
 test('12 quarter loss is visible and prevents any further actions',async({page})=>{
   await page.goto('/');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
   for(let turn=0;turn<12;turn++){
     await page.getByRole('button',{name:/ADVANCE QUARTER/}).click();
   }
@@ -49,6 +52,7 @@ test('12 quarter loss is visible and prevents any further actions',async({page})
 
 test('exported replay restores authoritative world and refuses tampered checksum',async({page})=>{
   await page.goto('/');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
   await page.getByRole('button',{name:'Select buildable site'}).click();
   await page.getByRole('button',{name:'Build Solar field'}).click();
   await page.getByRole('button',{name:/ADVANCE QUARTER/}).click();
@@ -73,6 +77,7 @@ test('exported replay restores authoritative world and refuses tampered checksum
 
 test('strategy works across three distinct sites and wins at turn 12',async({page})=>{
   await page.goto('/');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
   const next=page.getByRole('button',{name:'Next buildable site'});
   await next.click();
   await page.getByRole('button',{name:'Build Water recovery'}).click();
@@ -91,6 +96,7 @@ test('strategy works across three distinct sites and wins at turn 12',async({pag
 
 test('water terrain is excluded from selectable construction and replay cannot bypass the engine',async({page})=>{
   await page.goto('/');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
   const selection=page.getByRole('combobox',{name:'Buildable territory'});
   await expect(selection.locator('option[value="syn-7-7"]')).toHaveCount(0);
   await page.getByRole('button',{name:'Export replay'}).click();
@@ -102,4 +108,37 @@ test('water terrain is excluded from selectable construction and replay cannot b
   await expect(page.locator('.event-panel')).toContainText('Replay rejected: UNBUILDABLE_GEO_CELL');
   await expect(page.locator('.game-stat').first()).toContainText('1,000');
   await expect(page.locator('.game-hud-title')).toContainText('QUARTER 0 OF 12');
+});
+
+
+test('official Madrid Explore renders 21 sourced districts with provenance and no buildability',async({page})=>{
+  const errors:string[]=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/');
+  await expect(page.getByTestId('real-madrid-map')).toBeVisible();
+  await expect(page.locator('.real-district')).toHaveCount(21);
+  await expect(page.getByText('CONSTRUCTION LOCKED IN REAL EXPLORE')).toBeVisible();
+  await expect(page.getByText('district source 900012-3',{exact:false})).toBeVisible();
+  await expect(page.getByText('Building eligibility')).toBeVisible();
+  await expect(page.getByText('UNVERIFIED · LOCKED')).toBeVisible();
+  await expect(page.locator('canvas')).toHaveCount(0);
+  await page.screenshot({path:'test-results/real-madrid-explore.png',fullPage:true});
+  expect(errors).toEqual([]);
+});
+
+test('real district selection is keyboard accessible and does not change synthetic turn state',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Select Barajas official district'}).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.real-selection h3')).toHaveText('Barajas');
+  await expect(page.locator('.real-selection')).toContainText('21');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
+  await expect(page.locator('.game-hud-title')).toContainText('QUARTER 0 OF 12');
+  await page.getByRole('button',{name:'Select buildable site'}).click();
+  await page.getByRole('button',{name:'Build Solar field'}).click();
+  await expect(page.locator('.game-stat').first()).toContainText('920');
+  await page.getByRole('button',{name:'Real Madrid'}).click();
+  await expect(page.locator('.real-selection h3')).toHaveText('Barajas');
+  await page.getByRole('button',{name:'Play synthetic'}).click();
+  await expect(page.locator('.game-stat').first()).toContainText('920');
 });
