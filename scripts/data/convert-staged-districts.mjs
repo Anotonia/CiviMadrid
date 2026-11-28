@@ -12,10 +12,15 @@ import path from 'node:path';
 import {topologyToGeoJSON,requireMadridWGS84} from './topology-to-geojson.mjs';
 import {validateMadridGeoJSON} from './validate-madrid-geometry.mjs';
 import {validateManifest} from './validate-manifest.mjs';
+import {RESOURCE} from './fetch-madrid-boundaries.mjs';
 
-export function normalizeDistricts(source, onBoundedBridge = null) {
+// Audited in live runner 2026-11-28: 80 lattice-grid seams, max 30 steps.
+// This is a QUARANTINED visualization candidate, not GIS/legal release approval.
+export const PINNED_OFFICIAL_TOPOJSON_SHA256='b2082936d7c8c051824d2c1a2aefeb1fdfda94f71b308f6b75c385f01707c616';
+
+export function normalizeDistricts(source, onBoundedBridge = null, options = {}) {
  const features=source?.type==='Topology'
-   ?topologyToGeoJSON(source,onBoundedBridge)
+   ?topologyToGeoJSON(source,onBoundedBridge,options)
    :source;
  return requireMadridWGS84(features,validateMadridGeoJSON);
 }
@@ -37,7 +42,10 @@ export async function convertStagedDistricts(dir) {
  }
  const source=JSON.parse(raw.toString('utf8'));
  const boundedBridges=[];
- const collection=normalizeDistricts(source,bridge=>boundedBridges.push(bridge));
+ const pinnedSource=manifest.fileSha256===PINNED_OFFICIAL_TOPOJSON_SHA256 &&
+   [RESOURCE.downloadUrl,RESOURCE.geoportalTopoJSONUrl].includes(manifest.downloadUrl);
+ const seamCap=pinnedSource?30:3;
+ const collection=normalizeDistricts(source,bridge=>boundedBridges.push(bridge),{maxBridgeSteps:seamCap});
  const bounds=geometryBounds(collection);
  const output=Buffer.from(JSON.stringify(collection));
  const derived={
@@ -50,9 +58,11 @@ export async function convertStagedDistricts(dir) {
    nativeGrain:'district',
    districtFeatureCount:collection.features.length,
    boundedArcBridgeCount:boundedBridges.length,
+   sourcePinnedForQuarantinedVisualization:pinnedSource,
+   permittedQuantizationSeamSteps:seamCap,
    maxArcBridgeQuantizationSteps:boundedBridges.length?Math.max(...boundedBridges.map(b=>b.gapInQuantizationSteps)):0,
    bounds,
-   caveat:'Source may contain recorded short arc/ring seams bridged by straight segments (<=3 quantization steps) without moving source vertices. Full topology, native CRS, source-date and licensing review still required before release.',
+   caveat:'Pinned official source contains up to 30 quantization-step arc seams; bridge points retain original vertices and insert implied source path edges for QUARANTINED visualization only. Topological soundness, licensing and release-quality geometry review remain OPEN.',
    transformVersion:'topojson-to-wgs84-bounded-seams-v0.2',
    sourcePage:'https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-3-limites-administrativos-mapas'
  };
