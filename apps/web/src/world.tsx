@@ -18,11 +18,11 @@ export interface PrototypeCell {
 }
 const TERRAINS: Terrain[] = ['urban', 'forest', 'water', 'park', 'other'];
 const colors: Record<Terrain, string> = {
-  urban: '#b3ada0',
-  forest: '#547566',
-  park: '#7fa38a',
-  water: '#3e8098',
-  other: '#a69c7b',
+  urban: '#d6cdbd',
+  forest: '#82ae92',
+  park: '#abd0ad',
+  water: '#70b3c5',
+  other: '#ccc4aa',
 };
 
 function cellTerrain(q: number, r: number): Terrain {
@@ -113,8 +113,8 @@ function BuiltAssets({cells, world}: {cells:PrototypeCell[];world?:WorldState}) 
     {cells.filter(c=>world.cells[c.id]?.improvement!=='none' && world.cells[c.id]?.improvement).map(cell=>{
       const state=world.cells[cell.id];
       const construction=state.constructionTurnsRemaining>0;
-      const color=construction?'#d8ae6d':
-        state.improvement==='solar'?'#215475':state.improvement==='housing'?'#d9b69a':'#5bb1b4';
+      const color=construction?'#ecc580':
+        state.improvement==='solar'?'#649ab8':state.improvement==='housing'?'#e4c1a0':'#75c4bd';
       return <group key={cell.id} position={[cell.x,cell.y+0.38,cell.z]}>
        <mesh castShadow position={[0,0.12,0]}>
         {state.improvement==='housing'
@@ -151,11 +151,11 @@ export function WorldScene({
       gl={{antialias:true, alpha:false}}
       onPointerMissed={()=>onSelect('')}
     >
-      <color attach="background" args={['#9cb6bf']}/>
-      <fog attach="fog" args={['#9cb6bf',30,95]}/>
-      <ambientLight intensity={0.85}/>
-      <hemisphereLight args={['#e3eff4','#84715b',1.25]}/>
-      <directionalLight position={[16,32,14]} intensity={3.0} castShadow shadow-mapSize={[1024,1024]}/>
+      <color attach="background" args={['#b8d4dd']}/>
+      <fog attach="fog" args={['#d4e5e8',33,100]}/>
+      <ambientLight intensity={1.06}/>
+      <hemisphereLight args={['#fff9ee','#9aaea3',1.55]}/>
+      <directionalLight position={[16,32,14]} intensity={3.25} castShadow shadow-mapSize={[1024,1024]}/>
       <group rotation={[0,Math.PI/6,0]}>
         {TERRAINS.map(terrain => <HexLayer key={terrain} terrain={terrain} cells={cells} onSelect={onSelect} onHover={onHover}/>)}
         <BuiltAssets cells={cells} world={world}/>
