@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { WorldScene, syntheticCells } from './world';
 import { SiteNavigator } from './SiteNavigator';
+import RealMadridExplorer from './RealMadridExplorer';
 import { syntheticGeography } from './geoAdapter';
 import type { Command, ConstructionKind, WorldState } from '../../../packages/world-schema/src/index';
 import { evaluateCampaign, recordReplay, canonicalStateHash } from '../../../packages/sim-core/src/index';
@@ -25,6 +26,7 @@ function Stat({name,value,unit='',warning=false}:{name:string,value:number,unit?
 }
 
 export default function Game(){
+ const [view,setView]=useState<'real'|'synthetic'>('real');
  const cells=useMemo(syntheticCells,[]);
  const geography=useMemo(()=>syntheticGeography(cells),[cells]);
  const [state,setState]=useState<WorldState>(()=>stateFor(cells.map(c=>c.id)));
@@ -95,10 +97,14 @@ export default function Game(){
  }
  return <div className="shell">
   <header className="topbar"><div className="brand"><div className="brand-mark">C<span>·</span>M</div><div><h1>CiviMadrid</h1><p>THE CITY IS YOUR STRATEGY</p></div></div>
-   <div className="headline-status"><span className="status-beacon"/><span>ENGINE INTEGRATION</span><strong>SYNTHETIC M0</strong></div>
-   <button className="plain-button" onClick={restart}>Restart scenario</button>
+   <div className="headline-status"><span className="status-beacon"/><span>{view==='real'?'OFFICIAL DISTRICT EXPLORE':'ENGINE INTEGRATION'}</span><strong>{view==='real'?'SOURCE-DERIVED M1':'SYNTHETIC M0'}</strong></div>
+   <div className="mode-toggle" role="group" aria-label="World mode">
+    <button type="button" className={view==='real'?'active':''} onClick={()=>setView('real')} aria-pressed={view==='real'}>Real Madrid</button>
+    <button type="button" className={view==='synthetic'?'active':''} onClick={()=>setView('synthetic')} aria-pressed={view==='synthetic'}>Play synthetic</button>
+   </div>
+   {view==='synthetic'&&<button className="plain-button" onClick={restart}>Restart scenario</button>}
   </header>
-  <main className="game">
+  {view==='real'?<RealMadridExplorer/>:<main className="game">
    <section className="world" aria-label="Interactive synthetic world">
     <WorldScene selectedId={selection} onSelect={id=>setSelection(id||null)} onHover={()=>{}} world={state}/>
     <div className="world-label top-left"><span className="eyebrow">MADRID-INSPIRED · SYNTHETIC WORLD</span><strong>Every action leaves a trace.</strong><p>Build and advance time. Resource consequences come from the deterministic engine.</p></div>
@@ -162,6 +168,6 @@ export default function Game(){
     <p className="small-note">Development sites: {buildings}. M0 synthetic scenario only. This now has victory rules and replay import/export; no official Madrid observations or calibrated forecast.</p>
     <footer className="inspector-footer">CIVIMADRID / SYNTHETIC ENGINE DEMO <span>v0.1 · M0</span></footer>
    </aside>
-  </main>
+  </main>}
  </div>;
 }
