@@ -109,3 +109,93 @@ h1,h2,h3,p{margin:0}
 .site-navigator select{background:#102634;border:1px solid #66818e;color:#f4efe2;padding:10px;width:100%;font-size:12px}
 .site-navigator select:focus-visible,.site-navigator button:focus-visible{outline:2px solid #e8c783;outline-offset:2px}
 .site-navigator small{font-size:10px;line-height:1.5;color:#9daeb7}
+
+/* Unified daylight HUD and synthetic play palette.
+   Replaces the dark military-blue prototype mood with a readable civic atlas. */
+:root{color:#2c4347;background:#eff3ef}
+.shell .topbar{background:#f7f8f2;border-bottom:1px solid #c6d6d1;color:#2c4145}
+.topbar .brand h1{color:#273b40}
+.topbar .brand p{color:#617679}
+.topbar .brand-mark{background:#f0e5d0;color:#7a5733;border-color:#bf9e6d}
+.topbar .brand-mark span{color:#6b9995}
+.topbar .headline-status{color:#5d767a}
+.topbar .headline-status strong{color:#8a602f;border-left-color:#b6cac7}
+.topbar .status-beacon{background:#519e82;box-shadow:0 0 0 4px #519e8226}
+.topbar .plain-button{background:#fffdf6;color:#2f464b;border-color:#acbeba}
+.topbar .plain-button:hover{background:#e8f0eb}
+.topbar .mode-toggle button{background:#fffdf6;color:#50666b;border-color:#b9cbc6}
+.topbar .mode-toggle button.active{background:#e9c186;color:#293d42;border-color:#bc8e4e}
+.world{background:#d7e5e6}
+.world-label{
+  background:#f7faf1e8;border:1px solid #bdcbc3;
+  color:#2c4348;box-shadow:0 12px 26px #47636b1a;
+}
+.world-label strong{color:#284247}
+.world-label p{color:#536a6f}
+.world-label .eyebrow{color:#8b602c}
+.map-warning{
+  color:#72512e;background:#fff2d6ec;
+  border:1px solid #c8a572;
+}
+.world .compass{color:#2b4a51;text-shadow:0 1px 5px #f4f7f1}
+.inspector{background:#f3f5ef;color:#293f44;border-left-color:#c3d2cb}
+.inspector h2{color:#294047}
+.inspector .lead{color:#567076}
+.inspector .eyebrow{color:#88602f}
+.inspector .chapter{border-top-color:#bdcec7}
+.inspector .chapter-index{color:#667d80}
+.inspector .chapter strong{color:#2e464b}
+.inspector .chip{color:#3a7768;background:#e4f0e8;border-color:#9fc4b0}
+.inspector .selection{background:#e8f1eb;border-color:#b8cec5;color:#2b474b}
+.inspector .selection p{color:#547277}
+.inspector .property{border-bottom-color:#b5cbc5}
+.inspector .property span{color:#587478}
+.inspector .property strong{color:#344d51}
+.inspector .choose-site{
+  background:#f8e6c6;color:#604921;border-color:#c7a773;
+}
+.inspector .choose-site:hover{background:#f2d8ab}
+.inspector .site-navigator{background:#e9f1eb;color:#304a50;border-color:#b8cfc8}
+.inspector .site-navigator-heading{color:#8b622c}
+.inspector .site-navigator-heading span{color:#526a6e}
+.inspector .site-navigator button{background:#fcfcf6;color:#35515a;border-color:#a9c2bd}
+.inspector .site-navigator button:hover:not(:disabled){background:#dbeae3}
+.inspector .site-navigator label{color:#48676c}
+.inspector .site-navigator select{background:#fffefa;color:#2d494e;border-color:#a6c1bc}
+.inspector .site-navigator small{color:#667b7c}
+.inspector .build-actions button{
+  background:#fcfcf6;color:#2c4449;border-color:#b4ccc5;
+}
+.inspector .build-actions button:not(:disabled):hover{
+  background:#e4efe7;border-color:#b98c4b;
+}
+.inspector .build-actions small{color:#60787b}
+.inspector .build-actions em{color:#865e30}
+.inspector .campaign-result{
+  background:#e4f2e7;border-color:#a2cbb7;color:#335248;
+}
+.inspector .campaign-result strong{color:#326956}
+.inspector .campaign-result small{color:#547568}
+.inspector .event-panel{background:#fff0d6;color:#5a4831;border-left-color:#c99857}
+.inspector .event-panel span{color:#82572b}
+.inspector .replay-controls button,.inspector .replay-panel button{
+  background:#f5e6c8;color:#654d2e;border-color:#bb965e;
+}
+.inspector .replay-controls button:hover,.inspector .replay-panel button:hover{background:#f0d7a9}
+.inspector .replay-panel{background:#eaf1ea;border-color:#b9ccc6}
+.inspector .replay-panel label{color:#76552b}
+.inspector .replay-panel textarea{background:#fffefa;color:#263e43;border-color:#b0c5bf}
+.inspector .small-note{color:#697e7b}
+.inspector .inspector-footer{color:#748784;border-top-color:#c5d5cd}
+.game-hud{
+  background:#f9faf3ef;border-color:#b5c8c0;
+  box-shadow:0 14px 28px #48636924;
+}
+.game-hud-title{color:#805b2b}
+.game-stat{background:#e8f1e9;border-color:#c2d6cc}
+.game-stat span{color:#547075}
+.game-stat b{color:#29464a}
+.game-stat.warning b{color:#aa483c}
+.advance-turn{background:#e5b775;color:#263e42}
+.advance-turn:hover:not(:disabled){background:#f0c990}
+@media(max-width:1020px){.inspector{border-top-color:#c3d2cb}}
