@@ -51,3 +51,22 @@ test('rejects out-of-range negative arc IDs and invalid transforms',()=>{
  const u=topology();u.transform.scale=[Number.POSITIVE_INFINITY,1];
  assert.throws(()=>topologyToGeoJSON(u),/Invalid TopoJSON coordinate transform/);
 });
+
+test('bridges only very small quantized official source seams without moving vertices',()=>{
+ const t=topology();
+ // Reversed second arc now starts one quantization unit east and two north
+ // of the preceding arc, and closes with the same bounded offset.
+ t.arcs[1][0]=[1,2];
+ const bridges=[];
+ const collection=topologyToGeoJSON(t,entry=>bridges.push(entry));
+ assert.equal(bridges.length,2);
+ assert.ok(bridges.every(b=>b.gapInQuantizationSteps<=3));
+ const ring=collection.features[0].geometry.coordinates[0];
+ assert.deepEqual(ring[0],ring.at(-1));
+ assert.ok(ring.some(p=>Math.abs(p[0]-(-3.699))<1e-10&&Math.abs(p[1]-40.422)<1e-10));
+ assert.deepEqual(validateMadridGeoJSON(collection),[]);
+});
+test('refuses gaps larger than three quantization cells in a referenced arc',()=>{
+ const t=topology();t.arcs[1][0]=[4,4];
+ assert.throws(()=>topologyToGeoJSON(t),/Disconnected TopoJSON arcs/);
+});
