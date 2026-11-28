@@ -10,8 +10,8 @@ import {buildDistrictWorldSnapshot,buildAndWriteDistrictSnapshot} from './build-
 
 const polygon=(i)=>({
  type:'Feature',properties:{COD_DIS_TX:String(i).padStart(2,'0'),NOMBRE:i===1?'Centro':i===21?'Barajas':'Synthetic '+i},
- geometry:{type:'Polygon',coordinates:[[[-3.75+i*.002,40.42],[-3.748+i*.002,40.42],
-  [-3.748+i*.002,40.422],[-3.75+i*.002,40.422],[-3.75+i*.002,40.42]]]}
+ geometry:{type:'Polygon',coordinates:[[[-3.75+(i-1)*.002,40.42],[-3.748+(i-1)*.002,40.42],
+  [-3.748+(i-1)*.002,40.422],[-3.75+(i-1)*.002,40.422],[-3.75+(i-1)*.002,40.42]]]}
 });
 const collection=(n=1)=>({type:'FeatureCollection',features:Array.from({length:n},(_,i)=>polygon(i+1))});
 const mockManifest=raw=>({
