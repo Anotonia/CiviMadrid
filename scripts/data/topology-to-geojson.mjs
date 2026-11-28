@@ -126,3 +126,64 @@ export function requireMadridWGS84(features, validateGeoJSON) {
   if(issues.length)throw new Error('Decoded geometry needs CRS / polygon review: '+issues.slice(0,5).join('; '));
   return features;
 }
+
+
+/** Read-only seam audit in original TopoJSON quantization-grid coordinates.
+ * No polygon vertices are moved, snapped or published by this function.
+ * Report topology joins and ring closure, including all outlier gaps.
+ */
+export function auditTopoJSONSeams(topology) {
+  if(topology?.type!=='Topology'||!Array.isArray(topology.arcs) || !topology.objects)
+    throw new Error('Expected TopoJSON Topology');
+  const endpoints=topology.arcs.map(arc=>{
+    if(!Array.isArray(arc)||!arc.length)throw new Error('Empty TopoJSON arc');
+    const first=arc[0];
+    let x=0,y=0;
+    for(const delta of arc){
+      if(!Array.isArray(delta)||!isNumber(delta[0])||!isNumber(delta[1]))
+        throw new Error('Invalid TopoJSON delta coordinate');
+      if(topology.transform){x+=delta[0];y+=delta[1];}
+      else {x=delta[0];y=delta[1];}
+    }
+    return {first:first.slice(0,2),last:[x,y]};
+  });
+  const pointPair=id=>{
+    if(!Number.isInteger(id))throw new Error('Invalid TopoJSON arc index');
+    const n=id<0?~id:id;
+    if(!endpoints[n])throw new Error('Out of bounds TopoJSON arc');
+    const e=endpoints[n];
+    return id<0?{start:e.last,end:e.first}:{start:e.first,end:e.last};
+  };
+  let rings=0,nonzero=0,maxGapSteps=0;
+  const buckets={'1-3':0,'4-10':0,'11-100':0,'over100':0};
+  const examples=[];
+  const measure=(a,b,where)=>{
+    const distance=Math.max(Math.abs(a[0]-b[0]),Math.abs(a[1]-b[1]));
+    if(distance===0)return;
+    nonzero++;maxGapSteps=Math.max(maxGapSteps,distance);
+    if(distance<=3)buckets['1-3']++;
+    else if(distance<=10)buckets['4-10']++;
+    else if(distance<=100)buckets['11-100']++;
+    else buckets.over100++;
+    if(examples.length<8 || distance>Math.min(...examples.map(v=>v.gapSteps))) {
+      examples.push({gapSteps:distance,at:where});
+      examples.sort((a,b)=>b.gapSteps-a.gapSteps);
+      if(examples.length>8)examples.pop();
+    }
+  };
+  const measureRing=ring=>{
+    if(!Array.isArray(ring)||!ring.length)throw new Error('Empty TopoJSON ring');
+    rings++;
+    const joins=ring.map(pointPair);
+    for(let i=1;i<joins.length;i++)measure(joins[i-1].end,joins[i].start,'arc_join');
+    measure(joins.at(-1).end,joins[0].start,'ring_closure');
+  };
+  for(const object of Object.values(topology.objects)){
+    const geometries=object?.type==='GeometryCollection'?object.geometries:[object];
+    for(const g of geometries||[]){
+      if(g?.type==='Polygon')for(const ring of g.arcs)measureRing(ring);
+      else if(g?.type==='MultiPolygon')for(const poly of g.arcs)for(const ring of poly)measureRing(ring);
+    }
+  }
+  return {rings,nonzero,maxGapSteps,buckets,largestGaps:examples};
+}
