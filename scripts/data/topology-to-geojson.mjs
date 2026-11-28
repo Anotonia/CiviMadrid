@@ -8,7 +8,7 @@
  */
 const isNumber = x => typeof x === 'number' && Number.isFinite(x);
 
-export function topologyToGeoJSON(topology) {
+export function topologyToGeoJSON(topology, onBoundedBridge = null) {
   if (!topology || topology.type !== 'Topology' || !Array.isArray(topology.arcs) ||
       !topology.objects || typeof topology.objects !== 'object') {
     throw new Error('Expected TopoJSON Topology with arcs and objects');
@@ -29,6 +29,21 @@ export function topologyToGeoJSON(topology) {
       : [p[0],p[1]];
     if(!result.every(isNumber)) throw new Error('Invalid decoded coordinate');
     return result;
+  };
+  // Some official district exports contain 1–2 quantization-grid-cell seams.
+  // Preserve both endpoints and add a short explicit connection, but NEVER
+  // silently repair larger gaps or unquantized data. Report every bridge.
+  const allowedSteps = 3;
+  const bridgeSteps = (from,to) => {
+    if (!transformed || scale[0]===0 || scale[1]===0) return Infinity;
+    return Math.max(Math.abs((to[0]-from[0])/scale[0]),Math.abs((to[1]-from[1])/scale[1]));
+  };
+  const maybeBridge = (from,to,kind,index) => {
+    const steps=bridgeSteps(from,to);
+    if (!Number.isFinite(steps) || steps>allowedSteps+1e-6) return false;
+    if (typeof onBoundedBridge==='function')
+      onBoundedBridge({kind,index,gapInQuantizationSteps:steps});
+    return true;
   };
   const arcCache = new Map();
   function getArc(index){
@@ -58,12 +73,21 @@ export function topologyToGeoJSON(topology) {
       const arc=getArc(idx);
       if(points.length){
         const prev=points[points.length-1], start=arc[0];
-        if(prev[0]!==start[0]||prev[1]!==start[1])throw new Error('Disconnected TopoJSON arcs: index '+idx+'; previous='+JSON.stringify(prev)+' next='+JSON.stringify(start)+' delta='+JSON.stringify([start[0]-prev[0],start[1]-prev[1]]));
-        points.push(...arc.slice(1));
+        if(prev[0]!==start[0]||prev[1]!==start[1]){
+          if(!maybeBridge(prev,start,'arc_join',idx))
+            throw new Error('Disconnected TopoJSON arcs: index '+idx+'; previous='+JSON.stringify(prev)+' next='+JSON.stringify(start));
+          // Retain original vertices and the implied short edge. Never move a source point.
+          points.push(...arc);
+        } else points.push(...arc.slice(1));
       }else points.push(...arc);
     }
-    if(points.length<4||points[0][0]!==points[points.length-1][0]||
-       points[0][1]!==points[points.length-1][1])throw new Error('Open polygon ring');
+    if(points.length<4)throw new Error('Open polygon ring');
+    const first=points[0],last=points[points.length-1];
+    if(first[0]!==last[0]||first[1]!==last[1]){
+      if(!maybeBridge(last,first,'ring_closure',null))
+        throw new Error('Open polygon ring');
+      points.push(first.slice());
+    }
     return points;
   }
   function extractShape(g) {
