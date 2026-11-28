@@ -19,16 +19,20 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const METHOD = 'district-outer-ring-area-centroid-v0.1';
 
 function areaCentroid(ring) {
+  // Shift to a local origin to avoid catastrophic cancellation when
+  // subtracting nearly equal longitude*latitude products at district scale.
+  const [originLon,originLat]=ring[0];
   let crossSum = 0, xSum = 0, ySum = 0;
   for (let i=0; i<ring.length-1; i++) {
-    const [x0,y0]=ring[i], [x1,y1]=ring[i+1];
+    const x0=ring[i][0]-originLon, y0=ring[i][1]-originLat;
+    const x1=ring[i+1][0]-originLon, y1=ring[i+1][1]-originLat;
     const cross=x0*y1-x1*y0;
     crossSum+=cross;
     xSum+=(x0+x1)*cross;
     ySum+=(y0+y1)*cross;
   }
   if (Math.abs(crossSum)<1e-12) throw new Error('Degenerate district outer ring');
-  return {x:xSum/(3*crossSum),y:ySum/(3*crossSum),weight:Math.abs(crossSum)};
+  return {x:originLon+xSum/(3*crossSum),y:originLat+ySum/(3*crossSum),weight:Math.abs(crossSum)};
 }
 function districtCenter(geometry) {
   const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.coordinates;
