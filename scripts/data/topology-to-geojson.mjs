@@ -8,7 +8,7 @@
  */
 const isNumber = x => typeof x === 'number' && Number.isFinite(x);
 
-export function topologyToGeoJSON(topology, onBoundedBridge = null) {
+export function topologyToGeoJSON(topology, onBoundedBridge = null, options = {}) {
   if (!topology || topology.type !== 'Topology' || !Array.isArray(topology.arcs) ||
       !topology.objects || typeof topology.objects !== 'object') {
     throw new Error('Expected TopoJSON Topology with arcs and objects');
@@ -33,7 +33,9 @@ export function topologyToGeoJSON(topology, onBoundedBridge = null) {
   // Some official district exports contain 1–2 quantization-grid-cell seams.
   // Preserve both endpoints and add a short explicit connection, but NEVER
   // silently repair larger gaps or unquantized data. Report every bridge.
-  const allowedSteps = 3;
+  const allowedSteps = options.maxBridgeSteps ?? 3;
+  if(!Number.isInteger(allowedSteps)||allowedSteps<0||allowedSteps>30)
+    throw new Error('Unapproved TopoJSON seam tolerance');
   const bridgeSteps = (from,to) => {
     if (!transformed || scale[0]===0 || scale[1]===0) return Infinity;
     return Math.max(Math.abs((to[0]-from[0])/scale[0]),Math.abs((to[1]-from[1])/scale[1]));
