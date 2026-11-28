@@ -59,3 +59,66 @@ jobs:
         run: |
           echo "This CI provides contract, source-validator, headless reducer, and web BUILD checks only WHEN PRESENT."
           echo "It DOES NOT by itself establish actual browser playability, GIS accuracy, simulation balance, or M2 acceptance."
+
+
+  # Independent QA lane: opt-in real-source network audit on this draft PR only.
+  # Do not gate main releases on an external host until the fixture is pinned.
+  madrid-district-gis-audit:
+    if: github.event_name == 'pull_request' && github.head_ref == 'agent/qa-gis-source-audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout pinned GeoData revision
+        uses: actions/checkout@v4
+        with:
+          ref: b04f7478f0040d04f15c6af76defda1c3cd372c4
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify offline geographic contracts
+        run: node --test scripts/data/*.test.mjs
+      - name: Download one official district TopoJSON and verify raw SHA256
+        run: |
+          set -euo pipefail
+          node scripts/data/fetch-madrid-boundaries.mjs .data-staging --geoportal
+          node scripts/data/validate-manifest.mjs .data-staging/madrid-districts.manifest.json .data-staging/madrid-districts.raw.json
+      - name: Convert and derive contract WorldSnapshot
+        run: |
+          set -euo pipefail
+          node scripts/data/convert-staged-districts.mjs .data-staging
+          node scripts/data/build-district-world-snapshot.mjs .data-staging
+      - name: Assert 21 real districts, source hashes and no invented buildability
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const dir='.data-staging/';
+          const m=JSON.parse(fs.readFileSync(dir+'madrid-districts.manifest.json','utf8'));
+          const g=JSON.parse(fs.readFileSync(dir+'madrid-districts.geometry-report.json','utf8'));
+          const s=JSON.parse(fs.readFileSync(dir+'madrid-districts.world-snapshot.json','utf8'));
+          const r=JSON.parse(fs.readFileSync(dir+'madrid-districts.snapshot-report.json','utf8'));
+          assert.equal(m.sourceId,'madrid-district-boundaries-900012-3');
+          assert.equal(g.districtFeatureCount,21);
+          assert.equal(s.geoCells.length,21);
+          assert.equal(new Set(s.geoCells.map(c=>c.id)).size,21);
+          assert.ok(s.geoCells.every(c=>c.buildable===false));
+          assert.equal(r.buildableDistrictCells,0);
+          assert.equal(s.observedLayers.districtNames.values['district-01'],'Centro');
+          assert.equal(s.observedLayers.districtNames.values['district-21'],'Barajas');
+          const summary=['# Official Madrid distrito acquisition — M1 review candidate',
+            'Resource: '+m.downloadUrl,'Raw SHA256: '+m.fileSha256,
+            'GeoJSON SHA256: '+g.geojsonSha256,'WorldSnapshot SHA256: '+r.worldSnapshotSha256,
+            'Polygons: '+g.districtFeatureCount,'All 21 district centroids are blocked for construction until zoning review.',
+            'No observed water/energy/economic values are inferred. License/manual GIS review still open.'].join('\n');
+          console.log(summary);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary+'\n');
+          NODE
+      - name: Preserve source bytes and derived GIS artifacts for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: madrid-gis-district-raw-and-snapshot
+          path: .data-staging/madrid-districts.*
+          if-no-files-found: warn
+          retention-days: 7
