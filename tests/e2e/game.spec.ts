@@ -162,7 +162,7 @@ test('sourced Madrid has a real Three.js 3D relief with explicitly schematic hei
   expect(webgl,'WebGL context must be available to render the district 3D mesh').toBe(true);
   await expect(page.getByText('NO BUILDING MODELS OR OBSERVED HEIGHTS CONNECTED YET')).toBeVisible();
   await expect(page.getByText('SCHEMATIC · NOT OBSERVED')).toBeVisible();
-  await page.getByRole('button',{name:'21 · Barajas'}).click();
+  await page.locator('.real-districts button').filter({hasText:'Barajas'}).click();
   await expect(page.locator('.real-selection h3')).toHaveText('Barajas');
   await page.screenshot({path:'test-results/real-madrid-3d-relief.png',fullPage:true});
   await page.getByRole('button',{name:'2D DISTRICTS'}).click();
