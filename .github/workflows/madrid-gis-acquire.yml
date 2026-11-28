@@ -16,7 +16,7 @@ jobs:
       - name: Checkout pinned GeoData implementation, not main or a floating head
         uses: actions/checkout@v4
         with:
-          ref: c8d24c5b743bfb74e53e3077bf24e9f19d720583
+          ref: a38eeaf28239a50da503bd8994d6f8c17b515701
           persist-credentials: false
       - name: Install Node 22
         uses: actions/setup-node@v4
@@ -33,6 +33,8 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/data/convert-staged-districts.mjs .data-staging
+      - name: Derive WorldSnapshot with locked buildability (no invented zoning)
+        run: node scripts/data/build-district-world-snapshot.mjs .data-staging
       - name: Assert official district cardinality and report provenance
         run: |
           node --input-type=module <<'NODE'
@@ -42,6 +44,11 @@ jobs:
           const manifest=JSON.parse(fs.readFileSync(p+'madrid-districts.manifest.json','utf8'));
           const report=JSON.parse(fs.readFileSync(p+'madrid-districts.geometry-report.json','utf8'));
           const featureCollection=JSON.parse(fs.readFileSync(p+'madrid-districts.wgs84.geojson','utf8'));
+          const snapshot=JSON.parse(fs.readFileSync(p+'madrid-districts.world-snapshot.json','utf8'));
+          const snapshotReport=JSON.parse(fs.readFileSync(p+'madrid-districts.snapshot-report.json','utf8'));
+          assert.equal(snapshot.geoCells.length,21);
+          assert.ok(snapshot.geoCells.every(c=>c.buildable===false));
+          assert.equal(snapshotReport.buildableDistrictCells,0);
           assert.equal(manifest.sourceId,'madrid-district-boundaries-900012-3');
           assert.match(manifest.downloadUrl,/geoportal\.madrid\.es\/.*\/Distritos\/TopoJSON\/Distritos\.json$/);
           assert.equal(manifest.licenseUrl,'https://creativecommons.org/licenses/by/4.0/');
@@ -58,6 +65,7 @@ jobs:
             'Raw SHA256: '+manifest.fileSha256,
             'Converted SHA256: '+report.geojsonSha256,
             'District polygons: '+report.districtFeatureCount,
+            'WorldSnapshot SHA256: '+snapshotReport.worldSnapshotSha256,
             'BBox WGS84: '+JSON.stringify(report.bounds),
             'Source representation: TopoJSON delta arcs; coordinates validated within Madrid longitude/latitude bounds.',
             'No buildable hexes or measured utility values inferred. Manual GIS/legal review required before game release.'
@@ -75,5 +83,7 @@ jobs:
             .data-staging/madrid-districts.manifest.json
             .data-staging/madrid-districts.wgs84.geojson
             .data-staging/madrid-districts.geometry-report.json
+            .data-staging/madrid-districts.world-snapshot.json
+            .data-staging/madrid-districts.snapshot-report.json
           if-no-files-found: warn
           retention-days: 7
