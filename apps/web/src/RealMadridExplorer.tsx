@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './realMadrid.css';
+import RealMadrid3DScene from './RealMadrid3DScene';
 
 /**
  * Read-only sourced Explore layer. Polyline coordinates are a DISPLAY-ONLY
@@ -8,7 +9,7 @@ import './realMadrid.css';
  */
 type Position=[number,number];
 type SourceEntry=[string,string,string[][]];
-type District={code:string;name:string;rings:Position[][];path:string;cx:number;cy:number};
+type District={code:string;name:string;rings:Position[][];screenRings:Position[][];path:string;cx:number;cy:number};
 const SOURCE='/data/madrid-districts-preview.polyline.json';
 const SOURCE_PAGE='https://datos.madrid.es/dataset/900012-0-limites-administrativos-mapas/resource/900012-3-limites-administrativos-mapas';
 const RAW_SHA='b2082936d7c8c051824d2c1a2aefeb1fdfda94f71b308f6b75c385f01707c616';
@@ -81,12 +82,13 @@ function project(entries:ReturnType<typeof validateSource>):District[]{
       (i===0?'M':'L')+px.toFixed(2)+' '+py.toFixed(2)).join(' ')+' Z').join(' ');
     const pts=polylines[0];
     const cx=pts.reduce((n,p)=>n+p[0],0)/pts.length,cy=pts.reduce((n,p)=>n+p[1],0)/pts.length;
-    return {...x,path,cx,cy};
+    return {...x,path,cx,cy,screenRings:polylines};
   });
 }
 type Props={selectedCode?:string;onSelectDistrict?:(code:string)=>void};
 export default function RealMadridExplorer({selectedCode,onSelectDistrict}:Props){
   const [districts,setDistricts]=useState<District[]>([]);
+  const [renderMode,setRenderMode]=useState<'3d'|'2d'>('3d');
   const [error,setError]=useState<string|null>(null);
   const [localSelected,setLocalSelected]=useState('01');
   const selected=selectedCode??localSelected;
@@ -117,11 +119,16 @@ export default function RealMadridExplorer({selectedCode,onSelectDistrict}:Props
         <h2>Una ciudad. Veintiún mundos.</h2>
         <p>Explore Madrid's real administrative outline. Buildable parcels and city economy remain unverified.</p>
       </div>
+      <div className="real-view-switcher" role="group" aria-label="Real Madrid geography view">
+        <button type="button" className={renderMode==='3d'?'active':''} aria-pressed={renderMode==='3d'} onClick={()=>setRenderMode('3d')}>3D GEOGRAPHY</button>
+        <button type="button" className={renderMode==='2d'?'active':''} aria-pressed={renderMode==='2d'} onClick={()=>setRenderMode('2d')}>2D DISTRICTS</button>
+      </div>
       {error?<div className="real-map-error" role="alert">
         <strong>Official map layer could not be verified and loaded.</strong>
         <p>{error}</p><p>No synthetic boundary is substituted for the official source.</p>
       </div>:districts.length===0?
-        <div className="real-map-loading" role="status">Loading 21 source-derived Madrid districts…</div>:
+        <div className="real-map-loading" role="status">Loading 21 source-derived Madrid districts…</div>:renderMode==='3d'?
+        <RealMadrid3DScene districts={districts} selected={selected} onSelect={setSelected}/>:
         <svg data-testid="real-madrid-map" className="real-svg" viewBox={panZoom()}
           onWheel={e=>{e.preventDefault();setZoom(z=>Math.max(1,Math.min(4,z*(e.deltaY<0?1.12:.9))))}}
           onPointerDown={e=>{start.current={x:e.clientX,y:e.clientY,ox:offset[0],oy:offset[1]};moved.current=false;e.currentTarget.setPointerCapture(e.pointerId)}}
@@ -142,12 +149,12 @@ export default function RealMadridExplorer({selectedCode,onSelectDistrict}:Props
             <text x={current.cx+9/zoom} y={current.cy-8/zoom} fontSize={15/zoom}>{current.name}</text>
           </g>}
         </svg>}
-      <div className="real-zoom">
+      {renderMode==='2d'&&<div className="real-zoom">
         <button onClick={()=>setZoom(z=>Math.min(4,z*1.25))} aria-label="Zoom in">+</button>
         <button onClick={()=>setZoom(z=>Math.max(1,z/1.25))} aria-label="Zoom out">−</button>
         <button onClick={()=>{setZoom(1);setOffset([0,0])}} aria-label="Reset camera">⌖</button>
-      </div>
-      <div className="real-legend"><span>21 district boundaries</span><strong>OBSERVED SOURCE → DERIVED DISPLAY</strong></div>
+      </div>}
+      <div className="real-legend"><span>21 sourced districts · {renderMode.toUpperCase()} view</span><strong>OBSERVED PLAN · ART-DIRECTED RELIEF HEIGHT</strong></div>
     </section>
     <aside className="real-inspector">
       <span className="eyebrow">MADRID / EXPLORE MODE</span>
@@ -168,9 +175,10 @@ export default function RealMadridExplorer({selectedCode,onSelectDistrict}:Props
         <div className="property"><span>Native source grain</span><strong>Distrito</strong></div>
         <div className="property"><span>Polygon</span><strong>Derived from official data</strong></div>
         <div className="property"><span>Building eligibility</span><strong>UNVERIFIED · LOCKED</strong></div>
+        <div className="property"><span>3D heights</span><strong>SCHEMATIC · NOT OBSERVED</strong></div>
       </div>
       <div className="real-truth"><b>PROVENANCE / READ BEFORE USING</b>
-        <p>Ayuntamiento de Madrid, district source 900012-3. Open-data catalog lists CC BY 4.0. This rendering uses a 0.0005° topology-preserving simplification and 1e-5° coordinate quantization of a SHA-pinned audited source; it is not legal parcel, terrain, or utility data.</p>
+        <p>Ayuntamiento de Madrid, district source 900012-3. Open-data catalog lists CC BY 4.0. This rendering uses simplified WGS84 district polygon outlines, pinned to an audited source. The 3D district thickness is a constant artistic visualization, NOT official building heights, elevation, streets, zoning or utility data.</p>
         <p>Raw SHA256: <code>{RAW_SHA}</code></p>
         <p>Converted GeoJSON SHA256: <code>{DERIVED_SHA}</code></p>
         <a href={SOURCE_PAGE} target="_blank" rel="noreferrer">Ayuntamiento official source ↗</a>
