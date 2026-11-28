@@ -20,6 +20,7 @@ test('live official Madrid distrito distribution: 21 polygons, SHA256, WorldSnap
   const dir=await mkdtemp(path.join(tmpdir(),'civimadrid-official-'));
   try{
     const fetched=await acquire(dir,fetch,RESOURCE.geoportalTopoJSONUrl);
+    console.log('Official district source fetched: '+fetched.bytes+' bytes; raw SHA256 '+fetched.sha256);
     const geo=await convertStagedDistricts(dir);
     const snapshot=await buildAndWriteDistrictSnapshot(dir);
     assert.equal(geo.districtFeatureCount,21);
