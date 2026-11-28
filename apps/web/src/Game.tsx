@@ -27,6 +27,7 @@ function Stat({name,value,unit='',warning=false}:{name:string,value:number,unit?
 
 export default function Game(){
  const [view,setView]=useState<'real'|'synthetic'>('real');
+ const [realDistrict,setRealDistrict]=useState('01');
  const cells=useMemo(syntheticCells,[]);
  const geography=useMemo(()=>syntheticGeography(cells),[cells]);
  const [state,setState]=useState<WorldState>(()=>stateFor(cells.map(c=>c.id)));
@@ -104,7 +105,7 @@ export default function Game(){
    </div>
    {view==='synthetic'&&<button className="plain-button" onClick={restart}>Restart scenario</button>}
   </header>
-  {view==='real'?<RealMadridExplorer/>:<main className="game">
+  {view==='real'?<RealMadridExplorer selectedCode={realDistrict} onSelectDistrict={setRealDistrict}/>:<main className="game">
    <section className="world" aria-label="Interactive synthetic world">
     <WorldScene selectedId={selection} onSelect={id=>setSelection(id||null)} onHover={()=>{}} world={state}/>
     <div className="world-label top-left"><span className="eyebrow">MADRID-INSPIRED · SYNTHETIC WORLD</span><strong>Every action leaves a trace.</strong><p>Build and advance time. Resource consequences come from the deterministic engine.</p></div>
