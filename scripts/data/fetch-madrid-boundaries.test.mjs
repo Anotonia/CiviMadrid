@@ -34,3 +34,24 @@ test('regression: official district layer is resource 900012-3, not census secti
   assert.match(RESOURCE.resourcePage,/900012-3-limites-administrativos-mapas/);
   assert.doesNotMatch(RESOURCE.downloadUrl,/900012-5/);
 });
+
+test('Geoportal direct TopoJSON is an explicit official source, recorded in manifest', async()=>{
+  const topology=Buffer.from(JSON.stringify({type:'Topology',arcs:[],objects:{Distritos:{type:'GeometryCollection',geometries:[]}}}));
+  const dir=await mkdtemp(path.join(tmpdir(),'civimadrid-geoportal-'));
+  let fetchedUrl='';
+  try {
+    const result=await acquire(dir,async url=>{fetchedUrl=url;return {ok:true,arrayBuffer:async()=>topology};},RESOURCE.geoportalTopoJSONUrl);
+    assert.equal(fetchedUrl,RESOURCE.geoportalTopoJSONUrl);
+    assert.equal(result.manifest.downloadUrl,RESOURCE.geoportalTopoJSONUrl);
+    assert.deepEqual(validateManifest(result.manifest,topology),[]);
+    assert.equal((await readFile(path.join(dir,'madrid-districts.raw.json'))).compare(topology),0);
+  } finally {await rm(dir,{recursive:true,force:true});}
+});
+test('refuses substituted download endpoints before contacting network', async()=>{
+  let called=false;
+  await assert.rejects(
+    acquire('.data-staging',async()=>{called=true;return {ok:true};},'https://example.test/false-districts.json'),
+    /Unapproved Madrid district distribution URL/
+  );
+  assert.equal(called,false);
+});
