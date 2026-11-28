@@ -52,7 +52,6 @@ function DistrictExtrusion({
   const color=selected?'#d8b27b':hovered?'#a1c0b9':palette[Number(district.code)%palette.length];
   return <mesh
     name={'Madrid district '+district.code+' '+district.name}
-    data-source-kind="derived"
     geometry={geometry}
     rotation={[-Math.PI/2,0,0]}
     position={[0,selected?0.10:0.015,0]}
